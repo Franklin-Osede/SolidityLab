@@ -2,6 +2,7 @@
 pragma solidity ^0.8.19;
 
 import "./VulnerableVault.sol";
+import "../interfaces/IAttacker.sol";
 import "forge-std/console.sol";
 
 /**
@@ -13,7 +14,7 @@ import "forge-std/console.sol";
  * 2. Reentrancy in deposit() - infinite bonus
  * 3. Reentrancy in emergencyWithdraw() - complete drain
  */
-contract Attacker {
+contract Attacker is IAttacker {
     VulnerableVault public vault;
     uint256 public attackCount;
     uint256 public totalStolen;
@@ -26,7 +27,7 @@ contract Attacker {
     }
     
     // Function to start the attack
-    function attack() external payable {
+    function attack() external payable override {
         require(msg.value >= 1 ether, "Need at least 1 ETH to attack");
         
         console.log("Starting reentrancy attack...");
@@ -53,7 +54,7 @@ contract Attacker {
     }
     
     // Function to attack deposit bonus
-    function attackDepositBonus() external payable {
+    function attackDepositBonus() external payable override {
         require(msg.value >= 1 ether, "Need at least 1 ETH");
         
         console.log("Attacking deposit bonus...");
@@ -65,7 +66,7 @@ contract Attacker {
     }
     
     // Function to attack emergencyWithdraw
-    function attackEmergencyWithdraw() external payable {
+    function attackEmergencyWithdraw() external payable override {
         require(msg.value > 0, "Need ETH to attack");
         
         console.log("Attacking emergencyWithdraw...");
@@ -80,7 +81,7 @@ contract Attacker {
     }
     
     // receive() function - KEY ATTACK POINT
-    receive() external payable {
+    receive() external payable override {
         console.log("Receive called with:", msg.value);
         console.log("Attack count:", attackCount);
         
@@ -106,7 +107,7 @@ contract Attacker {
     }
     
     // Function to withdraw stolen ETH
-    function withdrawStolenFunds() external {
+    function withdrawStolenFunds() external override {
         uint256 balance = address(this).balance;
         require(balance > 0, "No funds to withdraw");
         
@@ -117,17 +118,17 @@ contract Attacker {
     }
     
     // Function to get attack statistics
-    function getAttackStats() external view returns (uint256, uint256, uint256) {
+    function getAttackStats() external view override returns (uint256, uint256, uint256) {
         return (attackCount, totalStolen, address(this).balance);
     }
     
     // Function to get vault balance
-    function getVaultBalance() external view returns (uint256) {
+    function getVaultBalance() external view override returns (uint256) {
         return vault.getContractBalance();
     }
     
     // Function to get attacker balance in vault
-    function getVaultUserBalance() external view returns (uint256) {
+    function getVaultUserBalance() external view override returns (uint256) {
         return vault.getBalance(address(this));
     }
 }

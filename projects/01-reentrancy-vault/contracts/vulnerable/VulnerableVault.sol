@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 
+import "../interfaces/IVault.sol";
+
 /**
  * @title VulnerableVault
  * @dev Contract vulnerable to reentrancy with multiple attack vectors
@@ -11,7 +13,7 @@ pragma solidity ^0.8.19;
  * 3. Missing ReentrancyGuard
  * 4. Inconsistent state during reentrancy
  */
-contract VulnerableVault {
+contract VulnerableVault is IVault {
     mapping(address => uint256) public balances;
     mapping(address => bool) public isDepositing;
     
@@ -20,7 +22,7 @@ contract VulnerableVault {
     event EmergencyWithdraw(address indexed user, uint256 amount);
     
     // Bug #1: Reentrancy in withdraw - state updated AFTER the CALL
-    function withdraw(uint256 amount) external {
+    function withdraw(uint256 amount) external override {
         require(balances[msg.sender] >= amount, "Insufficient balance");
         
         // ❌ BUG: State updated AFTER the CALL
@@ -35,7 +37,7 @@ contract VulnerableVault {
     }
     
     // Bug #2: Reentrancy in deposit with vulnerable logic
-    function deposit() external payable {
+    function deposit() external payable override {
         require(msg.value > 0, "Must send ETH");
         
         // ❌ BUG: State updated before complete validation
@@ -56,7 +58,7 @@ contract VulnerableVault {
     }
     
     // Bug #3: Vulnerable emergency function
-    function emergencyWithdraw() external {
+    function emergencyWithdraw() external override {
         require(isDepositing[msg.sender], "Not in deposit state");
         
         uint256 balance = balances[msg.sender];
@@ -74,17 +76,17 @@ contract VulnerableVault {
     }
     
     // Function to get contract balance
-    function getContractBalance() external view returns (uint256) {
+    function getContractBalance() external view override returns (uint256) {
         return address(this).balance;
     }
     
     // Function to get user balance
-    function getBalance(address user) external view returns (uint256) {
+    function getBalance(address user) external view override returns (uint256) {
         return balances[user];
     }
     
     // Function to receive ETH
-    receive() external payable {
+    receive() external payable override {
         // ❌ BUG: Allows deposits without validation
         balances[msg.sender] += msg.value;
         emit Deposit(msg.sender, msg.value);
