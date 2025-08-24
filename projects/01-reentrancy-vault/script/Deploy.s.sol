@@ -4,76 +4,118 @@ pragma solidity ^0.8.19;
 import "forge-std/Script.sol";
 import "../contracts/vulnerable/VulnerableVault.sol";
 import "../contracts/vulnerable/Attacker.sol";
+import "../contracts/fixed/FixedVault.sol";
+import "../contracts/fixed/SafeAttacker.sol";
 
 /**
  * @title DeployScript
- * @dev Script to deploy the reentrancy project contracts
+ * @dev Script to deploy both vulnerable and fixed versions for comparison
  */
 contract DeployScript is Script {
-    VulnerableVault public vault;
+    VulnerableVault public vulnerableVault;
     Attacker public attacker;
+    FixedVault public fixedVault;
+    SafeAttacker public safeAttacker;
     
     function run() external {
         uint256 deployerPrivateKey = vm.envUint("PRIVATE_KEY");
         address deployer = vm.addr(deployerPrivateKey);
         
-        console.log("Deployando contratos...");
-        console.log("Deployer:", deployer);
+        console.log("Deploying contracts with address:", deployer);
         
         vm.startBroadcast(deployerPrivateKey);
         
-        // Deploy VulnerableVault
-        console.log("Deployando VulnerableVault...");
-        vault = new VulnerableVault();
-        console.log("VulnerableVault deployed at:", address(vault));
+        // Deploy vulnerable contracts
+        console.log("Deploying VulnerableVault...");
+        vulnerableVault = new VulnerableVault();
+        console.log("VulnerableVault deployed at:", address(vulnerableVault));
         
-        // Deploy Attacker
-        console.log("Deployando Attacker...");
-        attacker = new Attacker(payable(address(vault)));
+        console.log("Deploying Attacker...");
+        attacker = new Attacker(payable(address(vulnerableVault)));
         console.log("Attacker deployed at:", address(attacker));
         
+        // Deploy fixed contracts
+        console.log("Deploying FixedVault...");
+        fixedVault = new FixedVault();
+        console.log("FixedVault deployed at:", address(fixedVault));
+        
+        console.log("Deploying SafeAttacker...");
+        safeAttacker = new SafeAttacker(payable(address(fixedVault)));
+        console.log("SafeAttacker deployed at:", address(safeAttacker));
+        
         vm.stopBroadcast();
         
-        console.log("Deployment completado!");
-        console.log("Vault address:", address(vault));
-        console.log("Attacker address:", address(attacker));
+        // Log deployment summary
+        console.log("\n=== DEPLOYMENT SUMMARY ===");
+        console.log("VulnerableVault:", address(vulnerableVault));
+        console.log("Attacker:", address(attacker));
+        console.log("FixedVault:", address(fixedVault));
+        console.log("SafeAttacker:", address(safeAttacker));
         
-        // Verificar deployment
-        console.log("\nVerificando deployment...");
-        console.log("Vault balance:", address(vault).balance);
-        console.log("Attacker balance:", address(attacker).balance);
+        // Save deployment addresses
+        string memory deploymentData = string.concat(
+            '{"vulnerableVault":"', vm.toString(address(vulnerableVault)), '",',
+            '"attacker":"', vm.toString(address(attacker)), '",',
+            '"fixedVault":"', vm.toString(address(fixedVault)), '",',
+            '"safeAttacker":"', vm.toString(address(safeAttacker)), '"}'
+        );
         
-        // Guardar addresses para uso posterior
-        string memory deploymentInfo = string(abi.encodePacked(
-            "VulnerableVault: ", vm.toString(address(vault)), "\n",
-            "Attacker: ", vm.toString(address(attacker)), "\n"
-        ));
-        
-        vm.writeFile("deployment.txt", deploymentInfo);
-        console.log("Deployment info guardado en deployment.txt");
+        vm.writeFile("deployment.json", deploymentData);
+        console.log("\nDeployment addresses saved to deployment.json");
     }
     
-    // Función para setup inicial con fondos
-    function setupWithFunds() external {
+    // Function to fund vaults for testing
+    function fundVaults() external {
         uint256 deployerPrivateKey = vm.envUint("PRIVATE_KEY");
-        // address deployer = vm.addr(deployerPrivateKey); // Unused variable
-        
-        console.log("Setup con fondos...");
         
         vm.startBroadcast(deployerPrivateKey);
         
-        // Enviar ETH al vault para simular depósitos
-        (bool success, ) = address(vault).call{value: 10 ether}("");
-        require(success, "Failed to fund vault");
+        // Fund vulnerable vault
+        (bool success1, ) = address(vulnerableVault).call{value: 10 ether}("");
+        require(success1, "Failed to fund vulnerable vault");
+        console.log("Funded VulnerableVault with 10 ETH");
         
-        // Enviar ETH al attacker
-        (success, ) = address(attacker).call{value: 5 ether}("");
-        require(success, "Failed to fund attacker");
+        // Fund fixed vault
+        (bool success2, ) = address(fixedVault).call{value: 10 ether}("");
+        require(success2, "Failed to fund fixed vault");
+        console.log("Funded FixedVault with 10 ETH");
         
         vm.stopBroadcast();
+    }
+    
+    // Function to demonstrate vulnerability
+    function demonstrateVulnerability() external {
+        uint256 deployerPrivateKey = vm.envUint("PRIVATE_KEY");
         
-        console.log("Setup con fondos completado!");
-        console.log("Vault balance:", address(vault).balance);
+        vm.startBroadcast(deployerPrivateKey);
+        
+        console.log("\n=== DEMONSTRATING VULNERABILITY ===");
+        console.log("Initial vault balance:", vulnerableVault.getContractBalance());
+        
+        // Attack the vulnerable vault
+        attacker.attack{value: 1 ether}();
+        
+        console.log("Final vault balance:", vulnerableVault.getContractBalance());
         console.log("Attacker balance:", address(attacker).balance);
+        
+        vm.stopBroadcast();
+    }
+    
+    // Function to demonstrate security
+    function demonstrateSecurity() external {
+        uint256 deployerPrivateKey = vm.envUint("PRIVATE_KEY");
+        
+        vm.startBroadcast(deployerPrivateKey);
+        
+        console.log("\n=== DEMONSTRATING SECURITY ===");
+        console.log("Initial vault balance:", fixedVault.getContractBalance());
+        
+        // Try to attack the fixed vault
+        safeAttacker.attack{value: 1 ether}();
+        
+        console.log("Final vault balance:", fixedVault.getContractBalance());
+        console.log("SafeAttacker balance:", address(safeAttacker).balance);
+        
+        vm.stopBroadcast();
     }
 }

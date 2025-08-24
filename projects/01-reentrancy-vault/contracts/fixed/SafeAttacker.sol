@@ -19,9 +19,6 @@ contract SafeAttacker is IAttacker {
     uint256 public override attackCount;
     uint256 public override totalStolen;
     
-    event AttackAttempted(uint256 attemptCount, string reason);
-    event SecurityTestPassed(string testName);
-    
     constructor(address payable _vault) {
         vault = FixedVault(_vault);
     }

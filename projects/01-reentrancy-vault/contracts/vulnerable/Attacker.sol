@@ -19,9 +19,6 @@ contract Attacker is IAttacker {
     uint256 public attackCount;
     uint256 public totalStolen;
     
-    event AttackExecuted(uint256 attackCount, uint256 amount);
-    event AttackCompleted(uint256 totalStolen);
-    
     constructor(address payable _vault) {
         vault = VulnerableVault(_vault);
     }

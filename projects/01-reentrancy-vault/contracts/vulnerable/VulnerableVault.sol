@@ -17,10 +17,6 @@ contract VulnerableVault is IVault {
     mapping(address => uint256) public balances;
     mapping(address => bool) public isDepositing;
     
-    event Deposit(address indexed user, uint256 amount);
-    event Withdraw(address indexed user, uint256 amount);
-    event EmergencyWithdraw(address indexed user, uint256 amount);
-    
     // Bug #1: Reentrancy in withdraw - state updated AFTER the CALL
     function withdraw(uint256 amount) external override {
         require(balances[msg.sender] >= amount, "Insufficient balance");
