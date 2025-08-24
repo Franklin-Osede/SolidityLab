@@ -9,7 +9,7 @@ import "../contracts/fixed/SafeAttacker.sol";
 
 /**
  * @title ReentrancyDemo
- * @dev Tests para demostración de reentrancy attack en video
+ * @dev Tests para demostracion de reentrancy attack en video
  */
 contract ReentrancyDemo is Test {
     VulnerableVault public vulnerableVault;
@@ -39,12 +39,12 @@ contract ReentrancyDemo is Test {
     }
     
     function testVulnerabilityDemo() public {
-        console.log("=== DEMOSTRACIÓN DE VULNERABILIDAD ===");
+        console.log("=== DEMOSTRACION DE VULNERABILIDAD ===");
         
         // Step 1: User deposits
         vm.startPrank(user);
         vulnerableVault.deposit{value: 1 ether}();
-        console.log("User depositó 1 ETH");
+        console.log("User deposito 1 ETH");
         console.log("User balance en vault:", vulnerableVault.getBalance(user));
         vm.stopPrank();
         
@@ -72,12 +72,12 @@ contract ReentrancyDemo is Test {
     }
     
     function testSecurityDemo() public {
-        console.log("=== DEMOSTRACIÓN DE SEGURIDAD ===");
+        console.log("=== DEMOSTRACION DE SEGURIDAD ===");
         
         // Step 1: User deposits
         vm.startPrank(user);
         fixedVault.deposit{value: 1 ether}();
-        console.log("User depositó 1 ETH");
+        console.log("User deposito 1 ETH");
         console.log("User balance en vault:", fixedVault.getBalance(user));
         vm.stopPrank();
         
@@ -105,7 +105,7 @@ contract ReentrancyDemo is Test {
     }
     
     function testComparison() public {
-        console.log("=== COMPARACIÓN VULNERABLE vs SEGURO ===");
+        console.log("=== COMPARACION VULNERABLE vs SEGURO ===");
         
         // Test vulnerable version
         vm.startPrank(user);
@@ -151,7 +151,7 @@ contract ReentrancyDemo is Test {
     }
     
     function testStepByStepVulnerability() public {
-        console.log("=== ANÁLISIS PASO A PASO DE LA VULNERABILIDAD ===");
+        console.log("=== ANALISIS PASO A PASO DE LA VULNERABILIDAD ===");
         
         // Step 1: Initial state
         console.log("Estado inicial:");
@@ -161,7 +161,7 @@ contract ReentrancyDemo is Test {
         // Step 2: User deposit
         vm.startPrank(user);
         vulnerableVault.deposit{value: 1 ether}();
-        console.log("\nDespués del depósito del usuario:");
+        console.log("\nDespues del deposito del usuario:");
         console.log("- User balance en vault:", vulnerableVault.getBalance(user));
         console.log("- Vault balance:", vulnerableVault.getContractBalance());
         vm.stopPrank();
@@ -184,13 +184,13 @@ contract ReentrancyDemo is Test {
     }
     
     function testReentrancyGuardProtection() public {
-        console.log("=== DEMOSTRACIÓN DE PROTECCIÓN ReentrancyGuard ===");
+        console.log("=== DEMOSTRACION DE PROTECCION ReentrancyGuard ===");
         
         // Try to call withdraw multiple times in the same transaction
         vm.startPrank(user);
         fixedVault.deposit{value: 1 ether}();
         
-        console.log("Intentando múltiples llamadas a withdraw...");
+        console.log("Intentando multiples llamadas a withdraw...");
         
         // This should fail due to ReentrancyGuard
         try fixedVault.withdraw(0.5 ether) {
@@ -198,19 +198,19 @@ contract ReentrancyDemo is Test {
             
             // Try second call - should fail
             try fixedVault.withdraw(0.5 ether) {
-                console.log("❌ SEGUNDA LLAMADA EXITOSA - VULNERABILIDAD!");
+                console.log("SEGUNDA LLAMADA EXITOSA - VULNERABILIDAD!");
             } catch Error(string memory reason) {
-                console.log("✅ Segunda llamada bloqueada:", reason);
+                console.log("Segunda llamada bloqueada:", reason);
             }
         } catch Error(string memory reason) {
-            console.log("Primera llamada falló:", reason);
+            console.log("Primera llamada fallo:", reason);
         }
         
         vm.stopPrank();
     }
     
     function testChecksEffectsInteractions() public {
-        console.log("=== DEMOSTRACIÓN DEL PATRÓN Checks-Effects-Interactions ===");
+        console.log("=== DEMOSTRACION DEL PATRON Checks-Effects-Interactions ===");
         
         vm.startPrank(user);
         fixedVault.deposit{value: 1 ether}();
@@ -220,7 +220,7 @@ contract ReentrancyDemo is Test {
         // This should work correctly
         fixedVault.withdraw(0.5 ether);
         
-        console.log("Balance después del withdraw:", fixedVault.getBalance(user));
+        console.log("Balance despues del withdraw:", fixedVault.getBalance(user));
         console.log("User ETH balance:", user.balance);
         
         vm.stopPrank();

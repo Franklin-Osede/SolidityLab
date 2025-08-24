@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.19;
+pragma solidity ^0.8.20;
 
 import "./VulnerableVault.sol";
 import "../interfaces/IAttacker.sol";
@@ -15,9 +15,9 @@ import "forge-std/console.sol";
  * 3. Reentrancy in emergencyWithdraw() - complete drain
  */
 contract Attacker is IAttacker {
-    VulnerableVault public vault;
-    uint256 public attackCount;
-    uint256 public totalStolen;
+    VulnerableVault public override vault;
+    uint256 public override attackCount;
+    uint256 public override totalStolen;
     
     constructor(address payable _vault) {
         vault = VulnerableVault(_vault);

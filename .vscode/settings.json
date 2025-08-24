@@ -1,0 +1,18 @@
+{
+    "solidity.defaultCompiler": "remote",
+    "solidity.compileUsingRemoteVersion": "0.8.20",
+    "solidity.packageDefaultDependenciesDirectory": "lib",
+    "solidity.packageDefaultDependenciesContractsDirectory": "",
+    "solidity.remappings": [
+        "forge-std/=lib/forge-std/src/",
+        "@openzeppelin/contracts/=lib/openzeppelin-contracts/contracts/"
+    ],
+    "solidity.includePath": [
+        "projects/**/*.sol",
+        "lib/**/*.sol"
+    ],
+    "solidity.remappingsUnused": [
+        "forge-std/=lib/forge-std/src/",
+        "@openzeppelin/contracts/=lib/openzeppelin-contracts/contracts/"
+    ]
+}

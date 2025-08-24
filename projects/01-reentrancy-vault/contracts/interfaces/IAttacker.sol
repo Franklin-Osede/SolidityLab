@@ -1,16 +1,20 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.19;
+pragma solidity ^0.8.20;
+
+import "./IVault.sol";
 
 /**
  * @title IAttacker
- * @dev Interface for Attacker contracts (vulnerable and safe versions)
+ * @dev Interface for attacker contracts
  */
 interface IAttacker {
     // Events
+    event AttackAttempted(uint256 attackType, string reason);
+    event SecurityTestPassed(string testName);
     event AttackExecuted(uint256 attackCount, uint256 amount);
     event AttackCompleted(uint256 totalStolen);
     
-    // Attack functions
+    // Core functions
     function attack() external payable;
     function attackDepositBonus() external payable;
     function attackEmergencyWithdraw() external payable;
@@ -21,11 +25,11 @@ interface IAttacker {
     function getVaultBalance() external view returns (uint256);
     function getVaultUserBalance() external view returns (uint256);
     
-    // State variables
-    function vault() external view returns (address);
+    // View functions
+    function vault() external view returns (address payable);
     function attackCount() external view returns (uint256);
     function totalStolen() external view returns (uint256);
     
-    // Receive function for reentrancy attacks
+    // Receive function
     receive() external payable;
 }

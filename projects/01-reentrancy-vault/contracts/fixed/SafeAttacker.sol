@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.19;
+pragma solidity ^0.8.20;
 
 import "./FixedVault.sol";
 import "../interfaces/IAttacker.sol";
@@ -106,12 +106,12 @@ contract SafeAttacker is IAttacker {
             console.log("Attempting reentrancy (should fail)...");
             
             try vault.withdraw(msg.value) {
-                console.log("❌ REENTRANCY SUCCEEDED - SECURITY BREACH!");
+                console.log("REENTRANCY SUCCEEDED - SECURITY BREACH!");
             } catch Error(string memory reason) {
-                console.log("✅ Reentrancy blocked with reason:", reason);
+                console.log("Reentrancy blocked with reason:", reason);
                 emit SecurityTestPassed("Reentrancy Blocked");
             } catch {
-                console.log("✅ Reentrancy blocked (generic error)");
+                console.log("Reentrancy blocked (generic error)");
                 emit SecurityTestPassed("Reentrancy Blocked");
             }
         }
@@ -162,9 +162,9 @@ contract SafeAttacker is IAttacker {
         console.log("Testing invalid withdraw protection...");
         
         try vault.withdraw(0) {
-            console.log("❌ Zero withdraw succeeded - potential issue");
+            console.log("Zero withdraw succeeded - potential issue");
         } catch Error(string memory reason) {
-            console.log("✅ Zero withdraw blocked:", reason);
+            console.log("Zero withdraw blocked:", reason);
             emit SecurityTestPassed("Invalid Withdraw Protection");
         }
     }
