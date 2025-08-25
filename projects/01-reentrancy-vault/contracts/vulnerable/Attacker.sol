@@ -15,7 +15,7 @@ import "forge-std/console.sol";
  * 3. Reentrancy in emergencyWithdraw() - complete drain
  */
 contract Attacker is IAttacker {
-    VulnerableVault public override vault;
+    VulnerableVault public vault;
     uint256 public override attackCount;
     uint256 public override totalStolen;
     

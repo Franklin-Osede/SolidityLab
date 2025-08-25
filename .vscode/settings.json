@@ -9,10 +9,14 @@
     ],
     "solidity.includePath": [
         "projects/**/*.sol",
-        "lib/**/*.sol"
+        "lib/**/*.sol",
+        "lib/forge-std/src/**/*.sol"
     ],
     "solidity.remappingsUnused": [
         "forge-std/=lib/forge-std/src/",
         "@openzeppelin/contracts/=lib/openzeppelin-contracts/contracts/"
-    ]
+    ],
+    "solidity.compileUsingLocalVersion": "0.8.20",
+    "solidity.enabledAsYouTypeCompilationErrorCheck": false,
+    "solidity.validationDelay": 1500
 }

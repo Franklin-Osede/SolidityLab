@@ -15,7 +15,7 @@ import "forge-std/console.sol";
  * 3. ✅ Proper validation prevents invalid operations
  */
 contract SafeAttacker is IAttacker {
-    FixedVault public override vault;
+    FixedVault public vault;
     uint256 public override attackCount;
     uint256 public override totalStolen;
     
