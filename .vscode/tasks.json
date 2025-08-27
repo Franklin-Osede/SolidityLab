@@ -1,0 +1,110 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "Foundry Test - Reentrancy",
+            "type": "shell",
+            "command": "forge",
+            "args": [
+                "test",
+                "--match-test",
+                "testReentrancyWithdraw",
+                "-vvvv"
+            ],
+            "group": "test",
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "shared",
+                "showReuseMessage": true,
+                "clear": false
+            },
+            "options": {
+                "cwd": "${workspaceFolder}/projects/01-reentrancy-vault"
+            },
+            "problemMatcher": []
+        },
+        {
+            "label": "Foundry Test - All",
+            "type": "shell",
+            "command": "forge",
+            "args": [
+                "test",
+                "-vvvv"
+            ],
+            "group": "test",
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "shared",
+                "showReuseMessage": true,
+                "clear": false
+            },
+            "options": {
+                "cwd": "${workspaceFolder}/projects/01-reentrancy-vault"
+            },
+            "problemMatcher": []
+        },
+        {
+            "label": "Debug Video Script",
+            "type": "shell",
+            "command": "./debug-video.sh",
+            "group": "test",
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "shared",
+                "showReuseMessage": true,
+                "clear": false
+            },
+            "options": {
+                "cwd": "${workspaceFolder}/projects/01-reentrancy-vault"
+            },
+            "problemMatcher": []
+        },
+        {
+            "type": "docker-build",
+            "label": "docker-build",
+            "platform": "node",
+            "dockerBuild": {
+                "dockerfile": "${workspaceFolder}/lib/openzeppelin-contracts/lib/forge-std/Dockerfile",
+                "context": "${workspaceFolder}/lib/openzeppelin-contracts/lib/forge-std",
+                "pull": true
+            },
+            "node": {
+                "package": "${workspaceFolder}/lib/openzeppelin-contracts/lib/forge-std/package.json"
+            }
+        },
+        {
+            "type": "docker-run",
+            "label": "docker-run: release",
+            "dependsOn": [
+                "docker-build"
+            ],
+            "platform": "node",
+            "node": {
+                "package": "${workspaceFolder}/lib/openzeppelin-contracts/lib/forge-std/package.json"
+            }
+        },
+        {
+            "type": "docker-run",
+            "label": "docker-run: debug",
+            "dependsOn": [
+                "docker-build"
+            ],
+            "dockerRun": {
+                "env": {
+                    "DEBUG": "*",
+                    "NODE_ENV": "development"
+                }
+            },
+            "node": {
+                "package": "${workspaceFolder}/lib/openzeppelin-contracts/lib/forge-std/package.json",
+                "enableDebugging": true
+            }
+        }
+    ]
+}

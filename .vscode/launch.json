@@ -1,14 +1,26 @@
 {
     "version": "0.2.0",
     "configurations": [
+        
         {
+            "name": "Foundry Test - Reentrancy Debug",
             "type": "node",
             "request": "launch",
-            "name": "Debug Foundry Tests",
-            "program": "${workspaceFolder}/node_modules/.bin/forge",
-            "args": ["test", "-vvv"],
-            "cwd": "${workspaceFolder}",
-            "console": "integratedTerminal"
+            "runtimeExecutable": "/Users/domoblock/.nvm/versions/node/v22.16.0/bin/node",
+            "program": "${workspaceFolder}/projects/01-reentrancy-vault/debug-runner.js",
+            "cwd": "${workspaceFolder}/projects/01-reentrancy-vault",
+            "console": "integratedTerminal",
+            "skipFiles": ["<node_internals>/**"]
+        },
+        {
+            "name": "Foundry Test - All Debug",
+            "type": "node",
+            "request": "launch",
+            "runtimeExecutable": "/Users/domoblock/.nvm/versions/node/v22.16.0/bin/node",
+            "program": "${workspaceFolder}/projects/01-reentrancy-vault/debug-runner-all.js",
+            "cwd": "${workspaceFolder}/projects/01-reentrancy-vault",
+            "console": "integratedTerminal",
+            "skipFiles": ["<node_internals>/**"]
         }
     ]
 }

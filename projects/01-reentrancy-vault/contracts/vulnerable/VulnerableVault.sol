@@ -2,6 +2,7 @@
 pragma solidity ^0.8.20;
 
 import "../interfaces/IVault.sol";
+import "forge-std/console.sol";
 
 /**
  * @title VulnerableVault
@@ -19,15 +20,34 @@ contract VulnerableVault is IVault {
     
     // Bug #1: Reentrancy in withdraw - state updated AFTER the CALL
     function withdraw(uint256 amount) external override {
+        console.log("BREAKPOINT 1 - Antes del require:");
+        console.log("   - Balance actual:", balances[msg.sender]);
+        console.log("   - Amount a retirar:", amount);
+        console.log("   - Caller:", msg.sender);
+        
         require(balances[msg.sender] >= amount, "Insufficient balance");
+        
+        console.log("BREAKPOINT 2 - Antes del CALL:");
+        console.log("   - Balance antes del CALL:", balances[msg.sender]);
+        console.log("   - Amount a enviar:", amount);
         
         // ❌ BUG: State updated AFTER the CALL
         // This allows reentrancy
         (bool success, ) = msg.sender.call{value: amount}("");
+        
+        console.log("BREAKPOINT 3 - Despues del CALL:");
+        console.log("   - CALL exitoso:", success);
+        console.log("   - Balance despues del CALL:", balances[msg.sender]);
+        console.log("   - Balance NO ha cambiado aun!");
+        
         require(success, "Transfer failed");
         
         // ❌ BUG: State updated after the CALL
         balances[msg.sender] -= amount;
+        
+        console.log("BREAKPOINT 4 - Despues de actualizar estado:");
+        console.log("   - Balance final:", balances[msg.sender]);
+        console.log("   - Estado actualizado DESPUES del CALL!");
         
         emit Withdraw(msg.sender, amount);
     }

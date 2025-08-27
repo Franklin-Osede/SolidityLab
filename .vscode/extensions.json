@@ -2,6 +2,7 @@
     "recommendations": [
         "NomicFoundation.hardhat-solidity",
         "tintinweb.solidity-visual-auditor",
-        "JuanBlanco.solidity"
+        "JuanBlanco.solidity",
+        "ms-vscode.vscode-json"
     ]
 }
