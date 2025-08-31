@@ -7,19 +7,19 @@ import "@openzeppelin/contracts/security/Pausable.sol";
 
 /**
  * @title SecureVaultOwnable
- * @dev Contrato seguro usando OpenZeppelin Ownable pattern
+ * @dev Secure contract using OpenZeppelin Ownable pattern
  * 
- * NIVEL 1: Basic Access Control
- * - Usa Ownable para funciones críticas
- * - Implementa Pausable para emergencias
- * - Usa ReentrancyGuard para prevenir reentrancy
+ * LEVEL 1: Basic Access Control
+ * - Uses Ownable for critical functions
+ * - Implements Pausable for emergencies
+ * - Uses ReentrancyGuard to prevent reentrancy
  * 
- * MEJORAS IMPLEMENTADAS:
- * ✅ Access modifiers en todas las funciones críticas
- * ✅ Pausable para emergencias
- * ✅ ReentrancyGuard para seguridad adicional
- * ✅ Events para auditoría
- * ✅ Validaciones de entrada
+ * IMPLEMENTED IMPROVEMENTS:
+ * ✅ Access modifiers on all critical functions
+ * ✅ Pausable for emergencies
+ * ✅ ReentrancyGuard for additional security
+ * ✅ Events for auditing
+ * ✅ Input validations
  */
 contract SecureVaultOwnable is Ownable, ReentrancyGuard, Pausable {
     // State variables
@@ -34,14 +34,14 @@ contract SecureVaultOwnable is Ownable, ReentrancyGuard, Pausable {
     event EmergencyWithdraw(address indexed owner, uint256 amount);
     
     /**
-     * @dev Constructor con configuración inicial
+     * @dev Constructor with initial configuration
      */
     constructor(uint256 _maxWithdrawal) {
         maxWithdrawal = _maxWithdrawal;
     }
     
     /**
-     * @dev Función de depósito - pública pero pausable
+     * @dev Deposit function - public but pausable
      */
     function deposit() external payable whenNotPaused {
         require(msg.value > 0, "Amount must be greater than 0");
@@ -53,8 +53,8 @@ contract SecureVaultOwnable is Ownable, ReentrancyGuard, Pausable {
     }
     
     /**
-     * @dev Función de retiro - solo owner
-     * @notice Solo el owner puede retirar fondos
+     * @dev Withdrawal function - owner only
+     * @notice Only the owner can withdraw funds
      */
     function withdraw(uint256 amount) external onlyOwner nonReentrant whenNotPaused {
         require(amount > 0, "Amount must be greater than 0");
@@ -70,21 +70,21 @@ contract SecureVaultOwnable is Ownable, ReentrancyGuard, Pausable {
     }
     
     /**
-     * @dev Función para pausar el contrato - solo owner
+     * @dev Function to pause the contract - owner only
      */
     function pause() external onlyOwner {
         _pause();
     }
     
     /**
-     * @dev Función para despausar el contrato - solo owner
+     * @dev Function to unpause the contract - owner only
      */
     function unpause() external onlyOwner {
         _unpause();
     }
     
     /**
-     * @dev Función para actualizar límite de retiro - solo owner
+     * @dev Function to update withdrawal limit - owner only
      */
     function updateMaxWithdrawal(uint256 newMaxWithdrawal) external onlyOwner {
         require(newMaxWithdrawal > 0, "Max withdrawal must be greater than 0");
@@ -96,8 +96,8 @@ contract SecureVaultOwnable is Ownable, ReentrancyGuard, Pausable {
     }
     
     /**
-     * @dev Función de emergencia - solo owner
-     * @notice Permite retirar todo en caso de emergencia
+     * @dev Emergency function - owner only
+     * @notice Allows withdrawing everything in case of emergency
      */
     function emergencyWithdraw() external onlyOwner {
         uint256 balance = address(this).balance;
@@ -112,27 +112,27 @@ contract SecureVaultOwnable is Ownable, ReentrancyGuard, Pausable {
     }
     
     /**
-     * @dev Función para obtener balance de un usuario
+     * @dev Function to get user balance
      */
     function getBalance(address user) external view returns (uint256) {
         return balances[user];
     }
     
     /**
-     * @dev Función para obtener balance del contrato
+     * @dev Function to get contract balance
      */
     function getContractBalance() external view returns (uint256) {
         return address(this).balance;
     }
     
     /**
-     * @dev Función para recibir ETH
+     * @dev Function to receive ETH
      */
     receive() external payable {}
     
     /**
-     * @dev Función para transferir ownership - override de Ownable
-     * @notice Agrega validación adicional
+     * @dev Function to transfer ownership - override of Ownable
+     * @notice Adds additional validation
      */
     function transferOwnership(address newOwner) public virtual override onlyOwner {
         require(newOwner != address(0), "New owner cannot be zero address");

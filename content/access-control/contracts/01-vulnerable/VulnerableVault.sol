@@ -58,7 +58,7 @@ contract VulnerableVault {
     }
     
     /**
-     * @dev VULNERABILITY 2: Faulty RBAC Implementation
+     * @dev VULNERABILITY 2: Faulty RBAC (Role-Based Access Control) Implementation
      * @notice Anyone can assign admin roles to themselves
      * REAL CASE: Many protocols hacked due to role management issues
      */
