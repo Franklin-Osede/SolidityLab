@@ -3,14 +3,13 @@ pragma solidity ^0.8.19;
 
 /**
  * @title VulnerableVault
- * @dev Vulnerable contract demonstrating real Access Control problems
+ * @dev Simplified vulnerable contract demonstrating real Access Control problems
  * 
  * IMPLEMENTED VULNERABILITIES:
- * 1. Missing Access Modifiers - Functions without restrictions
- * 2. Faulty RBAC - Insecure role management
- * 3. Unprotected Initialization - Multiple initialization
- * 4. External Call Dependencies - External calls without validation
- * 5. Inconsistent Permissions - Inconsistent permissions across modules
+ * 1. Missing Access Modifiers - Anyone can withdraw funds
+ * 2. Faulty RBAC - Anyone can assign admin roles
+ * 3. Unprotected Initialization - Anyone can become owner
+ * 4. Emergency Function without Access Control - Anyone can pause contract
  * 
  * REAL CASES: Bybit, Nobitex, KiloEx ($7.4M hack)
  */
@@ -23,12 +22,14 @@ contract VulnerableVault {
     address public owner;
     bool public initialized;
     uint256 public totalFunds;
+    bool public paused;
     
     // Events
     event Deposit(address indexed user, uint256 amount);
     event Withdraw(address indexed user, uint256 amount);
     event AdminAdded(address indexed admin);
     event RoleAssigned(address indexed user, bytes32 role);
+    event ContractPaused(address indexed pauser);
     
     /**
      * @dev Constructor - No access control
@@ -40,10 +41,12 @@ contract VulnerableVault {
     
     /**
      * @dev VULNERABILITY 1: Missing Access Modifiers
-     * @notice Anyone can withdraw funds
+     * @notice Anyone can withdraw funds from any account
+     * REAL CASE: Bybit hack where anyone could withdraw
      */
     function withdraw(uint256 amount) external {
         require(balances[msg.sender] >= amount, "Insufficient balance");
+        require(!paused, "Contract is paused");
         
         balances[msg.sender] -= amount;
         totalFunds -= amount;
@@ -56,59 +59,59 @@ contract VulnerableVault {
     
     /**
      * @dev VULNERABILITY 2: Faulty RBAC Implementation
-     * @notice Anyone can assign roles
+     * @notice Anyone can assign admin roles to themselves
+     * REAL CASE: Many protocols hacked due to role management issues
      */
     function assignRole(address user, bytes32 role) external {
-        // ❌ NO CALLER VALIDATION
+        // ❌ NO CALLER VALIDATION - ANYONE CAN ASSIGN ROLES
         userRoles[user] = role;
+        if (role == keccak256("ADMIN_ROLE")) {
+            isAdmin[user] = true;
+        }
         emit RoleAssigned(user, role);
     }
     
     /**
      * @dev VULNERABILITY 3: Unprotected Initialization
-     * @notice Can be called multiple times
+     * @notice Anyone can become owner by calling this function
+     * REAL CASE: Proxy pattern vulnerabilities in many protocols
      */
     function initialize() external {
-        // ❌ NO INITIALIZATION CHECK
+        // ❌ NO INITIALIZATION CHECK - CAN BE CALLED MULTIPLE TIMES
         owner = msg.sender;
         isAdmin[msg.sender] = true;
         initialized = true;
     }
     
     /**
-     * @dev VULNERABILITY 4: External Call Dependencies
-     * @notice External calls without validation
+     * @dev VULNERABILITY 4: Emergency Function without Access Control
+     * @notice Anyone can pause the contract
+     * REAL CASE: Critical functions without protection
      */
-    function executeExternalCall(address target, bytes calldata data) external {
-        // ❌ NO TARGET VALIDATION
-        (bool success, ) = target.call(data);
-        require(success, "External call failed");
+    function pause() external {
+        // ❌ NO ACCESS CONTROL - ANYONE CAN PAUSE
+        paused = true;
+        emit ContractPaused(msg.sender);
     }
     
     /**
-     * @dev VULNERABILITY 5: Inconsistent Permissions
-     * @notice This function has access control
+     * @dev Function to unpause - also vulnerable
      */
-    function secureFunction() external {
-        require(isAdmin[msg.sender], "Only admin");
-        // Secure implementation
+    function unpause() external {
+        // ❌ NO ACCESS CONTROL - ANYONE CAN UNPAUSE
+        paused = false;
     }
     
     /**
-     * @dev VULNERABILITY 5: Inconsistent Permissions
-     * @notice This function has NO access control
-     */
-    function insecureFunction() external {
-        // ❌ NO ACCESS CONTROL - INCONSISTENT
-        // Can be called by anyone
-    }
-    
-    /**
-     * @dev Deposit function
+     * @dev Deposit function - basic functionality
      */
     function deposit() external payable {
+        require(!paused, "Contract is paused");
+        require(msg.value > 0, "Amount must be greater than 0");
+        
         balances[msg.sender] += msg.value;
         totalFunds += msg.value;
+        
         emit Deposit(msg.sender, msg.value);
     }
     
@@ -119,22 +122,6 @@ contract VulnerableVault {
         // ❌ NO VALIDATION - ANYONE CAN ADD ADMINS
         isAdmin[newAdmin] = true;
         emit AdminAdded(newAdmin);
-    }
-    
-    /**
-     * @dev Function to pause contract (vulnerable)
-     */
-    function pause() external {
-        // ❌ NO ACCESS CONTROL
-        // Anyone can pause the contract
-    }
-    
-    /**
-     * @dev Function to update parameters (vulnerable)
-     */
-    function updateParameters(uint256 newValue) external {
-        // ❌ NO ACCESS CONTROL
-        // Anyone can change critical parameters
     }
     
     /**

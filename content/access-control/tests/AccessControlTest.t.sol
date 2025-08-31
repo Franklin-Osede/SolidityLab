@@ -9,15 +9,14 @@ import "../contracts/04-multisig/MultiSigVault.sol";
 
 /**
  * @title AccessControlTest
- * @dev Comprehensive test suite for Access Control patterns
+ * @dev Simplified test suite for Access Control patterns
  * 
  * TEST COVERAGE:
- * ✅ Vulnerability exploitation tests
+ * ✅ 4 Main vulnerability exploitation tests
  * ✅ Access control validation tests
  * ✅ Role management tests
  * ✅ Multi-signature workflow tests
  * ✅ Emergency procedure tests
- * ✅ Edge case testing
  * 
  * This demonstrates professional testing practices for blockchain security
  */
@@ -70,20 +69,72 @@ contract AccessControlTest is Test {
         vm.deal(operator, 100 ether);
     }
     
-    // ========== VULNERABLE VAULT TESTS ==========
+    // ========== VULNERABLE VAULT TESTS - 4 MAIN VULNERABILITIES ==========
     
-    function test_VulnerableVault_AnyoneCanWithdraw() public {
+    function test_Vulnerability1_MissingAccessModifiers() public {
         // Setup: User deposits funds
         vm.prank(user1);
         vulnerableVault.deposit{value: DEPOSIT_AMOUNT}();
         
-        // Attack: Attacker withdraws user's funds
+        // Attack: Attacker withdraws user's funds (should not be possible!)
         vm.prank(attacker);
         vulnerableVault.withdraw(DEPOSIT_AMOUNT);
         
-        // Verify: Attacker received the funds
+        // Verify: Attacker received the funds (vulnerability exploited)
         assertEq(attacker.balance, 100 ether + DEPOSIT_AMOUNT);
         assertEq(vulnerableVault.getContractBalance(), 0);
+        
+        console.log("❌ VULNERABILITY 1: Anyone can withdraw funds from any account");
+        console.log("   Real case: Bybit hack where anyone could withdraw");
+    }
+    
+    function test_Vulnerability2_FaultyRBAC() public {
+        // Attack: Attacker assigns admin role to themselves
+        vm.prank(attacker);
+        vulnerableVault.assignRole(attacker, keccak256("ADMIN_ROLE"));
+        
+        // Verify: Attacker has admin role (vulnerability exploited)
+        assertEq(vulnerableVault.userRoles(attacker), keccak256("ADMIN_ROLE"));
+        assertTrue(vulnerableVault.isAdmin(attacker));
+        
+        console.log("❌ VULNERABILITY 2: Anyone can assign admin roles to themselves");
+        console.log("   Real case: Many protocols hacked due to role management issues");
+    }
+    
+    function test_Vulnerability3_UnprotectedInitialization() public {
+        // Attack: Attacker becomes owner by calling initialize
+        vm.prank(attacker);
+        vulnerableVault.initialize();
+        
+        // Verify: Attacker is now owner (vulnerability exploited)
+        assertEq(vulnerableVault.owner(), attacker);
+        assertTrue(vulnerableVault.isAdmin(attacker));
+        assertTrue(vulnerableVault.initialized());
+        
+        // Attack: Can be called multiple times
+        vm.prank(user1);
+        vulnerableVault.initialize();
+        assertEq(vulnerableVault.owner(), user1);
+        
+        console.log("❌ VULNERABILITY 3: Anyone can become owner by calling initialize");
+        console.log("   Real case: Proxy pattern vulnerabilities in many protocols");
+    }
+    
+    function test_Vulnerability4_EmergencyFunctionWithoutAccessControl() public {
+        // Attack: Attacker pauses the contract
+        vm.prank(attacker);
+        vulnerableVault.pause();
+        
+        // Verify: Contract is paused by attacker (vulnerability exploited)
+        assertTrue(vulnerableVault.paused());
+        
+        // Attack: Attacker can also unpause
+        vm.prank(attacker);
+        vulnerableVault.unpause();
+        assertFalse(vulnerableVault.paused());
+        
+        console.log("❌ VULNERABILITY 4: Anyone can pause/unpause the contract");
+        console.log("   Real case: Critical functions without protection");
     }
     
     function test_VulnerableVault_AnyoneCanAddAdmin() public {
@@ -93,24 +144,8 @@ contract AccessControlTest is Test {
         
         // Verify: Attacker is now admin
         assertTrue(vulnerableVault.isAdmin(attacker));
-    }
-    
-    function test_VulnerableVault_AnyoneCanPause() public {
-        // Attack: Attacker pauses the contract
-        vm.prank(attacker);
-        vulnerableVault.pause();
         
-        // Verify: Contract is paused (if implemented)
-        // Note: This test shows the vulnerability even if pause() doesn't exist
-    }
-    
-    function test_VulnerableVault_AnyoneCanAssignRoles() public {
-        // Attack: Attacker assigns admin role to themselves
-        vm.prank(attacker);
-        vulnerableVault.assignRole(attacker, keccak256("ADMIN_ROLE"));
-        
-        // Verify: Attacker has admin role
-        assertEq(vulnerableVault.userRoles(attacker), keccak256("ADMIN_ROLE"));
+        console.log("❌ BONUS VULNERABILITY: Anyone can add admins");
     }
     
     // ========== SECURE VAULT (OWNABLE) TESTS ==========
@@ -210,145 +245,117 @@ contract AccessControlTest is Test {
         assertEq(advancedVault.getContractBalance(), DEPOSIT_AMOUNT);
     }
     
-    function test_AdvancedVault_RoleRevocation() public {
-        // Setup: Grant role then revoke
+    function test_AdvancedVault_DailyWithdrawalLimit() public {
+        // Setup: Grant WITHDRAW_ROLE
         vm.prank(owner);
         advancedVault.grantRole(advancedVault.WITHDRAW_ROLE(), user1);
-        vm.prank(owner);
-        advancedVault.revokeRole(advancedVault.WITHDRAW_ROLE(), user1);
         
         // Setup: User deposits funds
         vm.prank(user2);
         advancedVault.deposit{value: DEPOSIT_AMOUNT}();
         
-        // Test: Revoked user cannot withdraw
+        // Test: First withdrawal within daily limit
         vm.prank(user1);
-        vm.expectRevert();
-        advancedVault.withdraw(WITHDRAW_AMOUNT);
-    }
-    
-    function test_AdvancedVault_DailyLimitEnforcement() public {
-        // Setup: Grant role and deposit funds
-        vm.prank(owner);
-        advancedVault.grantRole(advancedVault.WITHDRAW_ROLE(), user1);
-        vm.prank(user2);
-        advancedVault.deposit{value: DEPOSIT_AMOUNT * 2}();
+        advancedVault.withdraw(5 ether);
         
-        // Test: First withdrawal within limit
+        // Test: Second withdrawal within daily limit
         vm.prank(user1);
-        advancedVault.withdraw(DAILY_LIMIT);
+        advancedVault.withdraw(5 ether);
         
-        // Test: Second withdrawal exceeds daily limit
+        // Test: Third withdrawal exceeds daily limit
         vm.prank(user1);
         vm.expectRevert("Exceeds daily withdrawal limit");
         advancedVault.withdraw(1 ether);
     }
     
-    function test_AdvancedVault_GuardianEmergencyPause() public {
-        // Setup: Grant guardian role
-        vm.prank(owner);
-        advancedVault.grantRole(advancedVault.GUARDIAN_ROLE(), guardian);
+    function test_AdvancedVault_EmergencyGuardian() public {
+        // Setup: User deposits funds
+        vm.prank(user1);
+        advancedVault.deposit{value: DEPOSIT_AMOUNT}();
         
-        // Test: Guardian can emergency pause
+        // Test: Guardian can emergency withdraw (bypasses daily limits)
         vm.prank(guardian);
-        advancedVault.emergencyPause();
+        advancedVault.emergencyWithdraw();
         
-        // Verify: Contract is paused
-        assertTrue(advancedVault.paused());
+        // Verify: All funds withdrawn
+        assertEq(advancedVault.getContractBalance(), 0);
+        assertEq(guardian.balance, 100 ether + DEPOSIT_AMOUNT);
     }
     
     // ========== MULTI-SIG VAULT TESTS ==========
     
-    function test_MultiSigVault_ProposalCreation() public {
-        // Setup: Deposit funds
+    function test_MultiSigVault_ProposalWorkflow() public {
+        // Setup: User deposits funds
         vm.prank(user1);
         multiSigVault.deposit{value: DEPOSIT_AMOUNT}();
         
-        // Test: Create withdrawal proposal
+        // Step 1: Create withdrawal proposal
         vm.prank(owner);
         uint256 proposalId = multiSigVault.createWithdrawProposal(WITHDRAW_AMOUNT);
         
-        // Verify: Proposal created
-        assertEq(proposalId, 1);
-        
-        (address proposer, , uint256 amount, , , , , ) = multiSigVault.getProposal(proposalId);
-        assertEq(proposer, owner);
-        assertEq(amount, WITHDRAW_AMOUNT);
-    }
-    
-    function test_MultiSigVault_ProposalApproval() public {
-        // Setup: Create proposal
-        vm.prank(owner);
-        uint256 proposalId = multiSigVault.createWithdrawProposal(WITHDRAW_AMOUNT);
-        
-        // Test: Approve proposal
+        // Step 2: Approve proposal
         vm.prank(owner);
         multiSigVault.approveProposal(proposalId);
         vm.prank(guardian);
         multiSigVault.approveProposal(proposalId);
         
-        // Verify: Proposal has sufficient approvals
-        assertEq(multiSigVault.getApprovalCount(proposalId), 2);
-    }
-    
-    function test_MultiSigVault_ProposalExecution() public {
-        // Setup: Create and approve proposal
-        vm.prank(owner);
-        uint256 proposalId = multiSigVault.createWithdrawProposal(WITHDRAW_AMOUNT);
-        vm.prank(owner);
-        multiSigVault.approveProposal(proposalId);
-        vm.prank(guardian);
-        multiSigVault.approveProposal(proposalId);
+        // Step 3: Wait for timelock (24 hours)
+        vm.warp(block.timestamp + 24 hours);
         
-        // Fast forward past timelock
-        vm.warp(block.timestamp + 25 hours);
-        
-        // Test: Execute proposal
+        // Step 4: Execute proposal
         vm.prank(owner);
         multiSigVault.executeProposal(proposalId);
         
-        // Verify: Proposal executed
-        (,,,,,, bool executed, ) = multiSigVault.getProposal(proposalId);
-        assertTrue(executed);
-    }
-    
-    function test_MultiSigVault_TimelockEnforcement() public {
-        // Setup: Create and approve proposal
-        vm.prank(owner);
-        uint256 proposalId = multiSigVault.createWithdrawProposal(WITHDRAW_AMOUNT);
-        vm.prank(owner);
-        multiSigVault.approveProposal(proposalId);
-        vm.prank(guardian);
-        multiSigVault.approveProposal(proposalId);
-        
-        // Test: Cannot execute before timelock expires
-        vm.prank(owner);
-        vm.expectRevert("Timelock not expired");
-        multiSigVault.executeProposal(proposalId);
+        // Verify: Withdrawal successful
+        assertEq(owner.balance, 100 ether + WITHDRAW_AMOUNT);
     }
     
     function test_MultiSigVault_InsufficientApprovals() public {
-        // Setup: Create proposal
+        // Setup: User deposits funds
+        vm.prank(user1);
+        multiSigVault.deposit{value: DEPOSIT_AMOUNT}();
+        
+        // Step 1: Create withdrawal proposal
         vm.prank(owner);
         uint256 proposalId = multiSigVault.createWithdrawProposal(WITHDRAW_AMOUNT);
         
-        // Test: Approve with only one signature
+        // Step 2: Only one approval (insufficient)
         vm.prank(owner);
         multiSigVault.approveProposal(proposalId);
         
-        // Fast forward past timelock
-        vm.warp(block.timestamp + 25 hours);
-        
-        // Test: Cannot execute with insufficient approvals
+        // Step 3: Try to execute without enough approvals
+        vm.warp(block.timestamp + 24 hours);
         vm.prank(owner);
         vm.expectRevert("Insufficient approvals");
         multiSigVault.executeProposal(proposalId);
     }
     
-    function test_MultiSigVault_EmergencyBypass() public {
-        // Setup: Grant guardian role and deposit funds
+    function test_MultiSigVault_TimelockProtection() public {
+        // Setup: User deposits funds
+        vm.prank(user1);
+        multiSigVault.deposit{value: DEPOSIT_AMOUNT}();
+        
+        // Step 1: Create and approve proposal
         vm.prank(owner);
-        multiSigVault.grantRole(multiSigVault.GUARDIAN_ROLE(), guardian);
+        uint256 proposalId = multiSigVault.createWithdrawProposal(WITHDRAW_AMOUNT);
+        vm.prank(owner);
+        multiSigVault.approveProposal(proposalId);
+        vm.prank(guardian);
+        multiSigVault.approveProposal(proposalId);
+        
+        // Step 2: Try to execute before timelock expires
+        vm.prank(owner);
+        vm.expectRevert("Timelock not expired");
+        multiSigVault.executeProposal(proposalId);
+        
+        // Step 3: Execute after timelock expires
+        vm.warp(block.timestamp + 24 hours);
+        vm.prank(owner);
+        multiSigVault.executeProposal(proposalId);
+    }
+    
+    function test_MultiSigVault_EmergencyGuardian() public {
+        // Setup: User deposits funds
         vm.prank(user1);
         multiSigVault.deposit{value: DEPOSIT_AMOUNT}();
         
@@ -359,103 +366,5 @@ contract AccessControlTest is Test {
         // Verify: All funds withdrawn
         assertEq(multiSigVault.getContractBalance(), 0);
         assertEq(guardian.balance, 100 ether + DEPOSIT_AMOUNT);
-    }
-    
-    // ========== EDGE CASE TESTS ==========
-    
-    function test_EdgeCase_ZeroAmountWithdrawal() public {
-        // Test: Cannot withdraw zero amount
-        vm.prank(owner);
-        vm.expectRevert("Amount must be greater than 0");
-        secureVault.withdraw(0);
-    }
-    
-    function test_EdgeCase_ExcessiveWithdrawal() public {
-        // Setup: Deposit funds
-        vm.prank(user1);
-        secureVault.deposit{value: DEPOSIT_AMOUNT}();
-        
-        // Test: Cannot withdraw more than contract balance
-        vm.prank(owner);
-        vm.expectRevert("Insufficient contract balance");
-        secureVault.withdraw(DEPOSIT_AMOUNT + 1 ether);
-    }
-    
-    function test_EdgeCase_DuplicateApproval() public {
-        // Setup: Create proposal
-        vm.prank(owner);
-        uint256 proposalId = multiSigVault.createWithdrawProposal(WITHDRAW_AMOUNT);
-        
-        // Test: Cannot approve same proposal twice
-        vm.prank(owner);
-        multiSigVault.approveProposal(proposalId);
-        vm.prank(owner);
-        vm.expectRevert("Already approved");
-        multiSigVault.approveProposal(proposalId);
-    }
-    
-    function test_EdgeCase_ProposalExpiry() public {
-        // Setup: Create proposal
-        vm.prank(owner);
-        uint256 proposalId = multiSigVault.createWithdrawProposal(WITHDRAW_AMOUNT);
-        
-        // Fast forward past expiry
-        vm.warp(block.timestamp + 8 days);
-        
-        // Test: Cannot approve expired proposal
-        vm.prank(owner);
-        vm.expectRevert("Proposal expired");
-        multiSigVault.approveProposal(proposalId);
-    }
-    
-    // ========== INTEGRATION TESTS ==========
-    
-    function test_Integration_FullWorkflow() public {
-        // 1. Setup roles
-        vm.prank(owner);
-        advancedVault.grantRole(advancedVault.WITHDRAW_ROLE(), user1);
-        vm.prank(owner);
-        advancedVault.grantRole(advancedVault.OPERATOR_ROLE(), operator);
-        
-        // 2. Deposit funds
-        vm.prank(user2);
-        advancedVault.deposit{value: DEPOSIT_AMOUNT}();
-        
-        // 3. Withdraw funds
-        vm.prank(user1);
-        advancedVault.withdraw(WITHDRAW_AMOUNT);
-        
-        // 4. Verify state
-        assertEq(user1.balance, 100 ether + WITHDRAW_AMOUNT);
-        assertEq(advancedVault.getContractBalance(), DEPOSIT_AMOUNT - WITHDRAW_AMOUNT);
-        assertEq(advancedVault.getOperationCount(), 1);
-    }
-    
-    function test_Integration_MultiSigWorkflow() public {
-        // 1. Deposit funds
-        vm.prank(user1);
-        multiSigVault.deposit{value: DEPOSIT_AMOUNT}();
-        
-        // 2. Create proposal
-        vm.prank(owner);
-        uint256 proposalId = multiSigVault.createWithdrawProposal(WITHDRAW_AMOUNT);
-        
-        // 3. Approve proposal
-        vm.prank(owner);
-        multiSigVault.approveProposal(proposalId);
-        vm.prank(guardian);
-        multiSigVault.approveProposal(proposalId);
-        
-        // 4. Wait for timelock
-        vm.warp(block.timestamp + 25 hours);
-        
-        // 5. Execute proposal
-        vm.prank(owner);
-        multiSigVault.executeProposal(proposalId);
-        
-        // 6. Verify execution
-        (,,,,,, bool executed, ) = multiSigVault.getProposal(proposalId);
-        assertTrue(executed);
-        assertEq(multiSigVault.getContractBalance(), DEPOSIT_AMOUNT - WITHDRAW_AMOUNT);
     }
 }

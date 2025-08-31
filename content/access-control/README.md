@@ -12,57 +12,52 @@ Unlike complex exploits that require multiple moving parts, access control attac
 - **Irreversible** (immediate fund loss)
 - **Simple** (often just one overlooked function)
 
-## 🔍 Top 5 Access Control Failures in 2025
+## 🔍 Top 4 Access Control Failures in 2025
 
 ### 1. Missing Access Modifiers
 ```solidity
-// ❌ VULNERABLE - Anyone can call
-function withdraw() external {
-    // No access control
+// ❌ VULNERABLE - Anyone can withdraw funds
+function withdraw(uint256 amount) external {
+    require(balances[msg.sender] >= amount, "Insufficient balance");
+    // No access control - anyone can withdraw from any account
 }
 ```
+**Real Case**: Bybit hack where anyone could withdraw funds
 
 ### 2. Faulty Role-Based Access Control (RBAC)
 ```solidity
-// ❌ VULNERABLE - Improper role management
+// ❌ VULNERABLE - Anyone can assign admin roles
 function assignRole(address user, bytes32 role) external {
-    // No validation of caller
-    roles[user] = role;
-}
-```
-
-### 3. Unprotected Initialization
-```solidity
-// ❌ VULNERABLE - Can be called multiple times
-function initialize() external {
-    // No initialization check
-    owner = msg.sender;
-}
-```
-
-### 4. External Call Dependencies
-```solidity
-// ❌ VULNERABLE - TrustedForwarder bypass
-function execute(bytes calldata data) external {
-    // No validation of forwarder
-    (bool success,) = target.call(data);
-}
-```
-
-### 5. Inconsistent Permissions Across Modules
-```solidity
-// ❌ VULNERABLE - Access checked in one contract but not another
-contract A {
-    modifier onlyOwner() { require(msg.sender == owner); _; }
-    function secure() external onlyOwner {}
-}
-
-contract B {
-    function insecure() external {
-        // No access control - can be called by anyone
+    // No caller validation - anyone can assign roles
+    userRoles[user] = role;
+    if (role == keccak256("ADMIN_ROLE")) {
+        isAdmin[user] = true;
     }
 }
 ```
+**Real Case**: Many protocols hacked due to role management issues
+
+### 3. Unprotected Initialization
+```solidity
+// ❌ VULNERABLE - Anyone can become owner
+function initialize() external {
+    // No initialization check - can be called multiple times
+    owner = msg.sender;
+    isAdmin[msg.sender] = true;
+    initialized = true;
+}
+```
+**Real Case**: Proxy pattern vulnerabilities in many protocols
+
+### 4. Emergency Functions Without Access Control
+```solidity
+// ❌ VULNERABLE - Anyone can pause the contract
+function pause() external {
+    // No access control - anyone can pause
+    paused = true;
+}
+```
+**Real Case**: Critical functions without protection
 
 ## 🛡️ Professional Solutions
 
@@ -112,6 +107,36 @@ contract AdvancedAccess is AccessControl {
 
 ## 🧪 Testing Strategy
 
+### 🚀 Commands to Run Tests
+
+#### **1. Run ALL Access Control Tests:**
+```bash
+# From inside content/access-control folder:
+forge test -vvv
+
+# From root directory:
+forge test --match-path "content/access-control/**/*.t.sol" -vvv
+```
+
+#### **2. Run Only Vulnerability Tests (4 main vulnerabilities):**
+```bash
+# From inside content/access-control folder:
+forge test --match-test "VulnerableVault_" -vvv
+
+
+
+#### **3. Run Only Secure Solution Tests:**
+```bash
+# Basic Ownable Pattern
+forge test --match-test "SecureVault_" -vvv
+
+# Advanced RBAC Pattern  
+forge test --match-test "AdvancedVault_" -vvv
+
+# Multi-Sig + Timelock Pattern
+forge test --match-test "MultiSigVault_" -vvv
+```
+
 ### Security Tests
 ```solidity
 function test_UnauthorizedAccess() public {
@@ -125,14 +150,7 @@ function test_RoleEscalation() public {
 }
 ```
 
-### Integration Tests
-```solidity
-function test_MultiSigExecution() public {
-    // Test multi-signature workflow
-    // Test timelock expiration
-    // Test role revocation
-}
-```
+
 
 ## 📊 Real-World Examples
 
@@ -184,5 +202,3 @@ function test_MultiSigExecution() public {
 - **100%**: Preventable with proper implementation
 
 ---
-
-*This guide demonstrates professional expertise in blockchain security and access control patterns. All examples are based on real-world vulnerabilities and industry best practices.*
