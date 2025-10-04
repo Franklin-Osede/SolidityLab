@@ -123,10 +123,13 @@ forge test --match-path "content/access-control/**/*.t.sol" -vvv
 # From inside content/access-control folder:
 forge test --match-test "VulnerableVault_" -vvv
 
-
+# From root directory:
+forge test --match-path "content/access-control/**/*.t.sol" --match-test "VulnerableVault_" -vvv
+```
 
 #### **3. Run Only Secure Solution Tests:**
 ```bash
+# From inside content/access-control folder:
 # Basic Ownable Pattern
 forge test --match-test "SecureVault_" -vvv
 
@@ -135,7 +138,42 @@ forge test --match-test "AdvancedVault_" -vvv
 
 # Multi-Sig + Timelock Pattern
 forge test --match-test "MultiSigVault_" -vvv
+
+# From root directory:
+forge test --match-path "content/access-control/**/*.t.sol" --match-test "SecureVault_" -vvv
+forge test --match-path "content/access-control/**/*.t.sol" --match-test "AdvancedVault_" -vvv
+forge test --match-path "content/access-control/**/*.t.sol" --match-test "MultiSigVault_" -vvv
 ```
+
+### 🎬 **For Video Demonstration:**
+
+#### **Step 1: Show Vulnerabilities (PASSING tests - demonstrating vulnerabilities work):**
+```bash
+# Navigate to access-control folder
+cd content/access-control
+
+# Run vulnerability tests - these should PASS (demonstrating vulnerabilities work)
+forge test --match-test "VulnerableVault_" -vvv
+```
+
+**Expected Results:**
+- ✅ `test_VulnerableVault_AnyoneCanWithdraw()` - Shows anyone can withdraw funds
+- ✅ `test_VulnerableVault_AnyoneCanAssignRoles()` - Shows anyone can assign admin roles  
+- ✅ `test_VulnerableVault_AnyoneCanAddAdmin()` - Shows anyone can become admin
+- ✅ `test_VulnerableVault_AnyoneCanPause()` - Shows anyone can pause contract
+
+#### **Step 2: Show Secure Solutions (PASSING tests - demonstrating security works):**
+```bash
+# Run secure solution tests - these should PASS (demonstrating security works)
+forge test --match-test "SecureVault_" -vvv
+forge test --match-test "AdvancedVault_" -vvv  
+forge test --match-test "MultiSigVault_" -vvv
+```
+
+**Expected Results:**
+- ✅ `test_SecureVault_OnlyOwnerCanWithdraw()` - Shows only owner can withdraw
+- ✅ `test_AdvancedVault_RoleBasedAccess()` - Shows role-based access control
+- ✅ `test_MultiSigVault_ProposalExecution()` - Shows multi-signature workflow
 
 ### Security Tests
 ```solidity
