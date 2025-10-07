@@ -1,30 +1,254 @@
-# 🚀 Solidity Lab - Debugging Avanzado
+# 🚀 Solidity Lab - Advanced Debugging
 
-## 📋 Descripción
+## 📋 Description
 
-Este proyecto contiene **15 contratos vulnerables** diseñados específicamente para demostrar habilidades avanzadas de debugging en Solidity. Cada contrato incluye bugs intencionales que permiten debugging extraordinario y análisis profundo de la EVM.
+This project contains **15 vulnerable contracts** specifically designed to demonstrate advanced debugging skills in Solidity. Each contract includes intentional bugs that allow extraordinary debugging and deep EVM analysis.
 
-## 🎯 Objetivos
+## 🎯 Objectives
 
-- **Demostrar expertise real** en seguridad de smart contracts
-- **Enseñar debugging avanzado** con herramientas profesionales
-- **Crear contenido educativo** de alta calidad
-- **Mejorar habilidades técnicas** en Solidity y EVM
+- **Demonstrate real expertise** in smart contract security
+- **Teach advanced debugging** with professional tools
+- **Create high-quality educational content**
+- **Improve technical skills** in Solidity and EVM
 
-## 📁 Estructura del Proyecto
+## 🔍 Testing Commands - Access Control
+
+### 🚀 Basic Commands
+```bash
+# Compile all contracts
+forge build
+
+# Clean and rebuild
+forge clean && forge build
+
+# Run all tests
+forge test
+
+# Tests with detailed output
+forge test -vvv
+
+# Tests with maximum verbosity (shows all logs)
+forge test -vvvv
+
+# Tests for a specific contract
+forge test --match-contract AccessControlTest
+```
+
+### 🔍 Vulnerability Tests
+```bash
+# Test: Anyone can withdraw funds (VULNERABLE)
+forge test --match-test "test_VulnerableVault_AnyoneCanWithdraw" -vvvv
+
+# Test: Anyone can become admin (VULNERABLE)
+forge test --match-test "test_VulnerableVault_AnyoneCanAddAdmin" -vvvv
+
+# Test: Anyone can pause contract (VULNERABLE)
+forge test --match-test "test_VulnerableVault_AnyoneCanPause" -vvvv
+
+# Test: Anyone can assign roles (VULNERABLE)
+forge test --match-test "test_VulnerableVault_AnyoneCanAssignRoles" -vvvv
+```
+
+### 🛡️ Security Solution Tests
+
+#### Basic Security (Ownable Pattern)
+```bash
+# Test: Only owner can withdraw (SECURE)
+forge test --match-test "test_SecureVault_OnlyOwnerCanWithdraw" -vvvv
+
+# Test: Non-owners cannot withdraw (SECURE)
+forge test --match-test "test_SecureVault_NonOwnerCannotWithdraw" -vvvv
+
+# Test: Only owner can pause (SECURE)
+forge test --match-test "test_SecureVault_OnlyOwnerCanPause" -vvvv
+
+# Test: Non-owners cannot pause (SECURE)
+forge test --match-test "test_SecureVault_NonOwnerCannotPause" -vvvv
+
+# Test: Emergency withdraw functionality
+forge test --match-test "test_SecureVault_EmergencyWithdraw" -vvvv
+```
+
+#### Advanced Security (Role-Based Access Control)
+```bash
+# Test: Role-based access control
+forge test --match-test "test_AdvancedVault_RoleBasedAccess" -vvvv
+
+# Test: Daily limit enforcement
+forge test --match-test "test_AdvancedVault_DailyLimitEnforcement" -vvvv
+
+# Test: Guardian emergency pause
+forge test --match-test "test_AdvancedVault_GuardianEmergencyPause" -vvvv
+
+# Test: Role revocation
+forge test --match-test "test_AdvancedVault_RoleRevocation" -vvvv
+
+# Test: Unauthorized access prevention
+forge test --match-test "test_AdvancedVault_UnauthorizedAccess" -vvvv
+```
+
+#### Multi-Signature Security
+```bash
+# Test: Proposal creation
+forge test --match-test "test_MultiSigVault_ProposalCreation" -vvvv
+
+# Test: Proposal approval process
+forge test --match-test "test_MultiSigVault_ProposalApproval" -vvvv
+
+# Test: Proposal execution with timelock
+forge test --match-test "test_MultiSigVault_ProposalExecution" -vvvv
+
+# Test: Timelock enforcement
+forge test --match-test "test_MultiSigVault_TimelockEnforcement" -vvvv
+
+# Test: Insufficient approvals rejection
+forge test --match-test "test_MultiSigVault_InsufficientApprovals" -vvvv
+
+# Test: Emergency bypass functionality
+forge test --match-test "test_MultiSigVault_EmergencyBypass" -vvvv
+```
+
+### 🔧 Edge Cases and Integration Tests
+
+#### Edge Cases
+```bash
+# Test: Duplicate approval prevention
+forge test --match-test "test_EdgeCase_DuplicateApproval" -vvvv
+
+# Test: Excessive withdrawal prevention
+forge test --match-test "test_EdgeCase_ExcessiveWithdrawal" -vvvv
+
+# Test: Proposal expiry handling
+forge test --match-test "test_EdgeCase_ProposalExpiry" -vvvv
+
+# Test: Zero amount withdrawal
+forge test --match-test "test_EdgeCase_ZeroAmountWithdrawal" -vvvv
+```
+
+#### Integration Tests
+```bash
+# Test: Complete workflow integration
+forge test --match-test "test_Integration_FullWorkflow" -vvvv
+
+# Test: Multi-signature workflow
+forge test --match-test "test_Integration_MultiSigWorkflow" -vvvv
+```
+
+### 📊 Analysis and Reporting
+
+#### Gas Analysis
+```bash
+# Generate gas report for all tests
+forge test --gas-report
+
+# Gas report for specific test
+forge test --match-test "test_MultiSigVault_ProposalExecution" --gas-report
+
+# Gas report for specific contract
+forge test --match-contract AccessControlTest --gas-report
+```
+
+#### Code Coverage
+```bash
+# Generate code coverage report
+forge coverage
+
+# Coverage for specific contract
+forge coverage --match-contract AccessControlTest
+
+# Coverage with detailed output
+forge coverage --report lcov
+```
+
+### 🚀 Deployment Commands
+
+#### Local Deployment
+```bash
+# Start local blockchain
+anvil
+
+# Deploy contracts locally
+forge script content/access-control/scripts/Deploy.s.sol --rpc-url http://localhost:8545 --private-key 0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 --broadcast -vvvv
+```
+
+#### Testnet Deployment
+```bash
+# Deploy to Sepolia testnet
+forge script content/access-control/scripts/Deploy.s.sol --rpc-url $SEPOLIA_RPC_URL --private-key $PRIVATE_KEY --broadcast --verify
+```
+
+### 🎬 LinkedIn Video Demo Script
+```bash
+#!/bin/bash
+
+echo "=== SOLIDITY SECURITY DEMONSTRATION ==="
+echo ""
+
+echo "1. SHOWING VULNERABILITIES:"
+echo "Anyone can withdraw funds:"
+forge test --match-test "test_VulnerableVault_AnyoneCanWithdraw" -vvvv
+
+echo ""
+echo "2. BASIC SECURITY SOLUTION:"
+echo "Only owner can withdraw:"
+forge test --match-test "test_SecureVault_OnlyOwnerCanWithdraw" -vvvv
+
+echo ""
+echo "3. ADVANCED SECURITY SOLUTION:"
+echo "Role-based access control:"
+forge test --match-test "test_AdvancedVault_RoleBasedAccess" -vvvv
+
+echo ""
+echo "4. ENTERPRISE SECURITY SOLUTION:"
+echo "Multi-signature governance:"
+forge test --match-test "test_MultiSigVault_ProposalExecution" -vvvv
+
+echo ""
+echo "5. COMPLETE WORKFLOW:"
+echo "End-to-end integration:"
+forge test --match-test "test_Integration_FullWorkflow" -vvvv
+```
+
+### 🎯 Most Important Demo Commands
+```bash
+# Show vulnerabilities
+forge test --match-test "test_VulnerableVault_AnyoneCanWithdraw" -vvvv
+
+# Show basic security
+forge test --match-test "test_SecureVault_OnlyOwnerCanWithdraw" -vvvv
+
+# Show advanced security
+forge test --match-test "test_AdvancedVault_RoleBasedAccess" -vvvv
+
+# Show multi-signature
+forge test --match-test "test_MultiSigVault_ProposalExecution" -vvvv
+
+# Show complete workflow
+forge test --match-test "test_Integration_FullWorkflow" -vvvv
+```
+
+### 📝 Important Notes
+- Use `-vvvv` for maximum verbosity to see all logs and transactions
+- Use `--gas-report` to analyze gas consumption
+- Use `--match-test` to run specific tests
+- Use `--match-contract` to run all tests for a specific contract
+- Use `forge coverage` to check code coverage
+- Use `time` command to measure execution time
+
+## 📁 Project Structure
 
 ```
 Solidity Lab/
-├── lib/                     # Dependencias de Foundry
-├── projects/                # Todos los proyectos organizados
-│   ├── 01-reentrancy-vault/ # Proyecto completo
+├── lib/                     # Foundry dependencies
+├── projects/                # All projects organized
+│   ├── 01-reentrancy-vault/ # Complete project
 │   │   ├── contracts/
-│   │   │   ├── vulnerable/  # Contratos con bugs
-│   │   │   ├── fixed/       # Contratos corregidos
+│   │   │   ├── vulnerable/  # Contracts with bugs
+│   │   │   ├── fixed/       # Fixed contracts
 │   │   │   └── interfaces/  # Interfaces
-│   │   ├── test/            # Tests del proyecto
-│   │   ├── script/          # Scripts de deployment
-│   │   └── docs/            # Documentación
+│   │   ├── test/            # Project tests
+│   │   ├── script/          # Deployment scripts
+│   │   └── docs/            # Documentation
 │   ├── 02-integer-overflow/
 │   ├── 03-tx-origin-confusion/
 │   ├── 04-storage-packing/
@@ -39,53 +263,53 @@ Solidity Lab/
 │   ├── 13-loop-dos/
 │   ├── 14-external-vs-public/
 │   └── 15-event-logging/
-├── tools/                   # Herramientas compartidas
-│   ├── debug-scripts/       # Scripts de debugging
-│   ├── utilities/           # Utilidades comunes
-│   └── config/              # Configuraciones
-├── videos/                  # Guiones para videos
-├── docs/                    # Documentación general
-├── foundry.toml             # Configuración de Foundry
-└── README.md                # Este archivo
+├── tools/                   # Shared tools
+│   ├── debug-scripts/       # Debugging scripts
+│   ├── utilities/           # Common utilities
+│   └── config/              # Configurations
+├── videos/                  # Video scripts
+├── docs/                    # General documentation
+├── foundry.toml             # Foundry configuration
+└── README.md                # This file
 ```
 
-## 🚨 Proyectos de Debugging
+## 🚨 Debugging Projects
 
-### 🔴 Seguridad Crítica (5 proyectos)
-1. **Vault con Reentrancy** - El bug más famoso
-2. **DEX Front-Running** - MEV y sandwich attacks
-3. **Proxy Storage Collision** - Delegatecall avanzado
-4. **Delegatecall Malicioso** - External calls inseguros
-5. **Integer Overflow/Underflow** - Cálculos financieros
+### 🔴 Critical Security (5 projects)
+1. **Reentrancy Vault** - The most famous bug
+2. **DEX Front-Running** - MEV and sandwich attacks
+3. **Proxy Storage Collision** - Advanced delegatecall
+4. **Malicious Delegatecall** - Unsafe external calls
+5. **Integer Overflow/Underflow** - Financial calculations
 
-### 🟡 Lógica de Negocio (5 proyectos)
-6. **Timestamp Dependence** - Manipulación de bloques
-7. **Gas Griefing** - DoS por gas insuficiente
+### 🟡 Business Logic (5 projects)
+6. **Timestamp Dependence** - Block manipulation
+7. **Gas Griefing** - DoS by insufficient gas
 8. **tx.origin Confusion** - Phishing attacks
-9. **Selfdestruct Exploit** - Destrucción de contratos
-10. **Short Address Attack** - Manipulación de calldata
+9. **Selfdestruct Exploit** - Contract destruction
+10. **Short Address Attack** - Calldata manipulation
 
-### 🔵 Optimización (5 proyectos)
-11. **Storage Packing** - Optimización de gas
-12. **Memory vs Storage** - Gestión de memoria
-13. **External vs Public** - Visibilidad de funciones
-14. **Loop DoS** - Bucles infinitos
-15. **Event Logging** - Optimización de logs
+### 🔵 Optimization (5 projects)
+11. **Storage Packing** - Gas optimization
+12. **Memory vs Storage** - Memory management
+13. **External vs Public** - Function visibility
+14. **Loop DoS** - Infinite loops
+15. **Event Logging** - Log optimization
 
-## 🛠️ Herramientas de Debugging
+## 🛠️ Debugging Tools
 
 ### Foundry Suite
 ```bash
-# Debugging paso a paso
+# Step-by-step debugging
 forge debug <txHash>
 
-# Trazas detalladas
+# Detailed traces
 forge test -vvvv
 
-# Análisis de gas
+# Gas analysis
 forge test --gas-report
 
-# Inspección de storage
+# Storage inspection
 cast storage <contract> <slot>
 ```
 
@@ -99,79 +323,79 @@ await contract.function({ gasLimit: 5000000 });
 ```
 
 ### Tenderly
-- Debugger visual de transacciones
-- Simulación de transacciones
-- Análisis de gas en tiempo real
+- Visual transaction debugger
+- Transaction simulation
+- Real-time gas analysis
 
-## 🚀 Empezando
+## 🚀 Getting Started
 
-### Prerrequisitos
+### Prerequisites
 ```bash
-# Instalar Foundry
+# Install Foundry
 curl -L https://foundry.paradigm.xyz | bash
 foundryup
 
-# Instalar dependencias
+# Install dependencies
 forge install
 ```
 
-### Configuración
+### Configuration
 ```bash
-# Copiar variables de entorno
+# Copy environment variables
 cp .env.example .env
 
-# Configurar variables
-PRIVATE_KEY=tu_private_key
-MAINNET_RPC_URL=tu_rpc_url
-ETHERSCAN_API_KEY=tu_api_key
+# Configure variables
+PRIVATE_KEY=your_private_key
+MAINNET_RPC_URL=your_rpc_url
+ETHERSCAN_API_KEY=your_api_key
 ```
 
-### Ejecutar el Primer Proyecto
+### Run First Project
 ```bash
-# Compilar contratos
+# Compile contracts
 forge build
 
-# Ejecutar tests del vault reentrancy
+# Run reentrancy vault tests
 forge test --match-contract VulnerableVaultTest -vvvv
 
-# Debug paso a paso
+# Step-by-step debug
 forge debug --match-test testReentrancyWithdraw
 
-# Ejecutar desde el directorio del proyecto
+# Run from project directory
 cd projects/01-reentrancy-vault
 forge test -vvvv
 ```
 
-## 📊 Metodología de Debugging
+## 📊 Debugging Methodology
 
-### Fase 1: Setup y Reproducción
-1. Deploy contrato vulnerable
-2. Crear test que reproduce el bug
-3. Documentar comportamiento esperado vs actual
+### Phase 1: Setup and Reproduction
+1. Deploy vulnerable contract
+2. Create test that reproduces the bug
+3. Document expected vs actual behavior
 
-### Fase 2: Análisis Profundo
-1. Usar `forge debug` para stepping
-2. Inspeccionar storage y stack
-3. Analizar gas consumption
-4. Identificar root cause
+### Phase 2: Deep Analysis
+1. Use `forge debug` for stepping
+2. Inspect storage and stack
+3. Analyze gas consumption
+4. Identify root cause
 
-### Fase 3: Fix y Verificación
-1. Implementar solución
-2. Crear tests de seguridad
-3. Verificar gas optimization
-4. Documentar lecciones aprendidas
+### Phase 3: Fix and Verification
+1. Implement solution
+2. Create security tests
+3. Verify gas optimization
+4. Document lessons learned
 
-## 🎬 Formato de Video
+## 🎬 Video Format
 
-### Estructura (5-8 minutos)
-1. **Hook (30s):** "Hoy voy a romper este contrato y arreglarlo en vivo"
-2. **Setup (1min):** Explicar el contrato y su propósito
-3. **Bug Demo (2min):** Mostrar el bug funcionando
-4. **Debugging (3min):** Usar herramientas para encontrar el problema
-5. **Fix (1min):** Implementar la solución
-6. **Verificación (30s):** Confirmar que está arreglado
+### Structure (5-8 minutes)
+1. **Hook (30s):** "Today I'm going to break this contract and fix it live"
+2. **Setup (1min):** Explain the contract and its purpose
+3. **Bug Demo (2min):** Show the bug working
+4. **Debugging (3min):** Use tools to find the problem
+5. **Fix (1min):** Implement the solution
+6. **Verification (30s):** Confirm it's fixed
 
-## 📈 Skills que Demuestras
+## 📈 Skills You Demonstrate
 
 ### EVM Internals
 - Opcode analysis
@@ -197,290 +421,66 @@ forge test -vvvv
 - Error root cause analysis
 - Tool proficiency
 
-## 🎯 Roadmap de Implementación
+## 🎯 Implementation Roadmap
 
-### Semana 1-2: Proyectos 1-5 (Seguridad Crítica)
-- [x] Vault Reentrancy
+### Week 1-2: Projects 1-5 (Critical Security)
+- [x] Reentrancy Vault
 - [ ] DEX Front-Running
 - [ ] Proxy Storage Collision
-- [ ] Delegatecall Malicioso
+- [ ] Malicious Delegatecall
 - [ ] Integer Overflow
 
-### Semana 3-4: Proyectos 6-10 (Lógica de Negocio)
+### Week 3-4: Projects 6-10 (Business Logic)
 - [ ] Timestamp Dependence
 - [ ] Gas Griefing
 - [ ] tx.origin Confusion
 - [ ] Selfdestruct Exploit
 - [ ] Short Address Attack
 
-### Semana 5-6: Proyectos 11-15 (Optimización)
+### Week 5-6: Projects 11-15 (Optimization)
 - [ ] Storage Packing
 - [ ] Memory vs Storage
 - [ ] External vs Public
 - [ ] Loop DoS
 - [ ] Event Logging
 
-## 🔍 Comandos de Testing - Access Control
+## 📚 Additional Resources
 
-### 🚀 Comandos Básicos
-```bash
-# Compilar todos los contratos
-forge build
-
-# Limpiar y recompilar
-forge clean && forge build
-
-# Ejecutar todos los tests
-forge test
-
-# Tests con output detallado
-forge test -vvv
-
-# Tests con máxima verbosidad (muestra todos los logs)
-forge test -vvvv
-
-# Tests de un contrato específico
-forge test --match-contract AccessControlTest
-```
-
-### 🔍 Tests de Vulnerabilidades
-```bash
-# Test: Cualquiera puede retirar fondos (VULNERABLE)
-forge test --match-test "test_VulnerableVault_AnyoneCanWithdraw" -vvvv
-
-# Test: Cualquiera puede ser admin (VULNERABLE)
-forge test --match-test "test_VulnerableVault_AnyoneCanAddAdmin" -vvvv
-
-# Test: Cualquiera puede pausar contrato (VULNERABLE)
-forge test --match-test "test_VulnerableVault_AnyoneCanPause" -vvvv
-
-# Test: Cualquiera puede asignar roles (VULNERABLE)
-forge test --match-test "test_VulnerableVault_AnyoneCanAssignRoles" -vvvv
-```
-
-### 🛡️ Tests de Soluciones de Seguridad
-
-#### Seguridad Básica (Patrón Ownable)
-```bash
-# Test: Solo el owner puede retirar (SEGURO)
-forge test --match-test "test_SecureVault_OnlyOwnerCanWithdraw" -vvvv
-
-# Test: No-owners no pueden retirar (SEGURO)
-forge test --match-test "test_SecureVault_NonOwnerCannotWithdraw" -vvvv
-
-# Test: Solo el owner puede pausar (SEGURO)
-forge test --match-test "test_SecureVault_OnlyOwnerCanPause" -vvvv
-
-# Test: No-owners no pueden pausar (SEGURO)
-forge test --match-test "test_SecureVault_NonOwnerCannotPause" -vvvv
-
-# Test: Funcionalidad de retiro de emergencia
-forge test --match-test "test_SecureVault_EmergencyWithdraw" -vvvv
-```
-
-#### Seguridad Avanzada (Control de Acceso Basado en Roles)
-```bash
-# Test: Control de acceso basado en roles
-forge test --match-test "test_AdvancedVault_RoleBasedAccess" -vvvv
-
-# Test: Aplicación de límite diario
-forge test --match-test "test_AdvancedVault_DailyLimitEnforcement" -vvvv
-
-# Test: Pausa de emergencia del guardian
-forge test --match-test "test_AdvancedVault_GuardianEmergencyPause" -vvvv
-
-# Test: Revocación de roles
-forge test --match-test "test_AdvancedVault_RoleRevocation" -vvvv
-
-# Test: Prevención de acceso no autorizado
-forge test --match-test "test_AdvancedVault_UnauthorizedAccess" -vvvv
-```
-
-#### Seguridad Multi-Firma
-```bash
-# Test: Creación de propuestas
-forge test --match-test "test_MultiSigVault_ProposalCreation" -vvvv
-
-# Test: Proceso de aprobación de propuestas
-forge test --match-test "test_MultiSigVault_ProposalApproval" -vvvv
-
-# Test: Ejecución de propuestas con timelock
-forge test --match-test "test_MultiSigVault_ProposalExecution" -vvvv
-
-# Test: Aplicación de timelock
-forge test --match-test "test_MultiSigVault_TimelockEnforcement" -vvvv
-
-# Test: Rechazo por aprobaciones insuficientes
-forge test --match-test "test_MultiSigVault_InsufficientApprovals" -vvvv
-
-# Test: Funcionalidad de bypass de emergencia
-forge test --match-test "test_MultiSigVault_EmergencyBypass" -vvvv
-```
-
-### 🔧 Tests de Casos Edge e Integración
-
-#### Casos Edge
-```bash
-# Test: Prevención de aprobación duplicada
-forge test --match-test "test_EdgeCase_DuplicateApproval" -vvvv
-
-# Test: Prevención de retiro excesivo
-forge test --match-test "test_EdgeCase_ExcessiveWithdrawal" -vvvv
-
-# Test: Manejo de expiración de propuestas
-forge test --match-test "test_EdgeCase_ProposalExpiry" -vvvv
-
-# Test: Retiro de cantidad cero
-forge test --match-test "test_EdgeCase_ZeroAmountWithdrawal" -vvvv
-```
-
-#### Tests de Integración
-```bash
-# Test: Integración de flujo completo
-forge test --match-test "test_Integration_FullWorkflow" -vvvv
-
-# Test: Flujo de trabajo multi-firma
-forge test --match-test "test_Integration_MultiSigWorkflow" -vvvv
-```
-
-### 📊 Análisis y Reportes
-
-#### Análisis de Gas
-```bash
-# Generar reporte de gas para todos los tests
-forge test --gas-report
-
-# Reporte de gas para test específico
-forge test --match-test "test_MultiSigVault_ProposalExecution" --gas-report
-
-# Reporte de gas para contrato específico
-forge test --match-contract AccessControlTest --gas-report
-```
-
-#### Cobertura de Código
-```bash
-# Generar reporte de cobertura
-forge coverage
-
-# Cobertura para contrato específico
-forge coverage --match-contract AccessControlTest
-
-# Cobertura con output detallado
-forge coverage --report lcov
-```
-
-### 🚀 Comandos de Deployment
-
-#### Deployment Local
-```bash
-# Iniciar blockchain local
-anvil
-
-# Deploy contratos localmente
-forge script content/access-control/scripts/Deploy.s.sol --rpc-url http://localhost:8545 --private-key 0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 --broadcast -vvvv
-```
-
-#### Deployment en Testnet
-```bash
-# Deploy en Sepolia testnet
-forge script content/access-control/scripts/Deploy.s.sol --rpc-url $SEPOLIA_RPC_URL --private-key $PRIVATE_KEY --broadcast --verify
-```
-
-### 🎬 Script de Demo para LinkedIn
-```bash
-#!/bin/bash
-
-echo "=== DEMOSTRACIÓN DE SEGURIDAD SOLIDITY ==="
-echo ""
-
-echo "1. MOSTRANDO VULNERABILIDADES:"
-echo "Cualquiera puede retirar fondos:"
-forge test --match-test "test_VulnerableVault_AnyoneCanWithdraw" -vvvv
-
-echo ""
-echo "2. SOLUCIÓN DE SEGURIDAD BÁSICA:"
-echo "Solo el owner puede retirar:"
-forge test --match-test "test_SecureVault_OnlyOwnerCanWithdraw" -vvvv
-
-echo ""
-echo "3. SOLUCIÓN DE SEGURIDAD AVANZADA:"
-echo "Control de acceso basado en roles:"
-forge test --match-test "test_AdvancedVault_RoleBasedAccess" -vvvv
-
-echo ""
-echo "4. SOLUCIÓN DE SEGURIDAD EMPRESARIAL:"
-echo "Gobernanza multi-firma:"
-forge test --match-test "test_MultiSigVault_ProposalExecution" -vvvv
-
-echo ""
-echo "5. FLUJO COMPLETO:"
-echo "Integración de extremo a extremo:"
-forge test --match-test "test_Integration_FullWorkflow" -vvvv
-```
-
-### 🎯 Comandos Más Importantes para Demo
-```bash
-# Mostrar vulnerabilidades
-forge test --match-test "test_VulnerableVault_AnyoneCanWithdraw" -vvvv
-
-# Mostrar seguridad básica
-forge test --match-test "test_SecureVault_OnlyOwnerCanWithdraw" -vvvv
-
-# Mostrar seguridad avanzada
-forge test --match-test "test_AdvancedVault_RoleBasedAccess" -vvvv
-
-# Mostrar multi-firma
-forge test --match-test "test_MultiSigVault_ProposalExecution" -vvvv
-
-# Mostrar flujo completo
-forge test --match-test "test_Integration_FullWorkflow" -vvvv
-```
-
-### 📝 Notas Importantes
-- Usa `-vvvv` para máxima verbosidad y ver todos los logs y transacciones
-- Usa `--gas-report` para analizar el consumo de gas
-- Usa `--match-test` para ejecutar tests específicos
-- Usa `--match-contract` para ejecutar todos los tests de un contrato específico
-- Usa `forge coverage` para verificar la cobertura de código
-- Usa el comando `time` para medir el tiempo de ejecución
-
-## 📚 Recursos Adicionales
-
-### Documentación
+### Documentation
 - [Solidity Docs](https://docs.soliditylang.org/)
 - [Foundry Book](https://book.getfoundry.sh/)
 - [Ethereum Yellow Paper](https://ethereum.github.io/yellowpaper/paper.pdf)
 
-### Herramientas
+### Tools
 - [Tenderly](https://tenderly.co/)
 - [Etherscan](https://etherscan.io/)
 - [Hardhat](https://hardhat.org/)
 
-### Comunidad
+### Community
 - [Ethereum Stack Exchange](https://ethereum.stackexchange.com/)
 - [OpenZeppelin Forum](https://forum.openzeppelin.com/)
 - [Solidity Discord](https://discord.gg/solidity)
 
-## 🤝 Contribuir
+## 🤝 Contributing
 
-1. Fork el proyecto
-2. Crea una rama para tu feature (`git checkout -b feature/AmazingFeature`)
-3. Commit tus cambios (`git commit -m 'Add some AmazingFeature'`)
-4. Push a la rama (`git push origin feature/AmazingFeature`)
-5. Abre un Pull Request
+1. Fork the project
+2. Create a feature branch (`git checkout -b feature/AmazingFeature`)
+3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
+4. Push to the branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request
 
-## 📄 Licencia
+## 📄 License
 
-Este proyecto está bajo la Licencia MIT - ver el archivo [LICENSE](LICENSE) para detalles.
+This project is under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-## 🎯 Próximos Pasos
+## 🎯 Next Steps
 
-1. **Ejecutar el primer proyecto:** `forge test --match-contract VulnerableVaultTest`
-2. **Crear el contrato seguro:** Implementar fixes
-3. **Grabar el primer video:** Documentar el proceso
-4. **Continuar con el siguiente proyecto:** Integer Overflow
-5. **Construir la serie completa:** Los 15 proyectos
+1. **Run the first project:** `forge test --match-contract VulnerableVaultTest`
+2. **Create the secure contract:** Implement fixes
+3. **Record the first video:** Document the process
+4. **Continue with the next project:** Integer Overflow
+5. **Build the complete series:** All 15 projects
 
 ---
 
-**¡Empezemos con el debugging extraordinario! 🚀**
+**Let's start with extraordinary debugging! 🚀**
