@@ -220,55 +220,229 @@ forge test -vvvv
 - [ ] Loop DoS
 - [ ] Event Logging
 
-## 🔍 Comandos Útiles
+## 🔍 Comandos de Testing - Access Control
 
-### Debugging
+### 🚀 Comandos Básicos
 ```bash
-# Debug específico
-forge test --match-test testReentrancyWithdraw -vvvv
+# Compilar todos los contratos
+forge build
 
-# Análisis de gas
-forge test --gas-report
+# Limpiar y recompilar
+forge clean && forge build
 
-# Storage inspection
-cast storage <address> <slot>
-
-# Call stack analysis
-forge debug --verbosity 4
-
-# Debug desde directorio del proyecto
-cd projects/01-reentrancy-vault
-forge test --match-test testReentrancyWithdraw -vvvv
-```
-
-### Deployment
-```bash
-# Deploy en local
-forge script projects/01-reentrancy-vault/script/Deploy.s.sol --rpc-url anvil
-
-# Deploy en testnet
-forge script projects/01-reentrancy-vault/script/Deploy.s.sol --rpc-url sepolia --broadcast
-
-# Deploy desde directorio del proyecto
-cd projects/01-reentrancy-vault
-forge script script/Deploy.s.sol --rpc-url anvil
-```
-
-### Testing
-```bash
 # Ejecutar todos los tests
 forge test
 
-# Ejecutar tests específicos
-forge test --match-contract VulnerableVaultTest
+# Tests con output detallado
+forge test -vvv
 
-# Tests con gas report
-forge test --gas-report --match-contract VulnerableVaultTest
-
-# Tests desde directorio del proyecto
-cd projects/01-reentrancy-vault
+# Tests con máxima verbosidad (muestra todos los logs)
 forge test -vvvv
+
+# Tests de un contrato específico
+forge test --match-contract AccessControlTest
 ```
+
+### 🔍 Tests de Vulnerabilidades
+```bash
+# Test: Cualquiera puede retirar fondos (VULNERABLE)
+forge test --match-test "test_VulnerableVault_AnyoneCanWithdraw" -vvvv
+
+# Test: Cualquiera puede ser admin (VULNERABLE)
+forge test --match-test "test_VulnerableVault_AnyoneCanAddAdmin" -vvvv
+
+# Test: Cualquiera puede pausar contrato (VULNERABLE)
+forge test --match-test "test_VulnerableVault_AnyoneCanPause" -vvvv
+
+# Test: Cualquiera puede asignar roles (VULNERABLE)
+forge test --match-test "test_VulnerableVault_AnyoneCanAssignRoles" -vvvv
+```
+
+### 🛡️ Tests de Soluciones de Seguridad
+
+#### Seguridad Básica (Patrón Ownable)
+```bash
+# Test: Solo el owner puede retirar (SEGURO)
+forge test --match-test "test_SecureVault_OnlyOwnerCanWithdraw" -vvvv
+
+# Test: No-owners no pueden retirar (SEGURO)
+forge test --match-test "test_SecureVault_NonOwnerCannotWithdraw" -vvvv
+
+# Test: Solo el owner puede pausar (SEGURO)
+forge test --match-test "test_SecureVault_OnlyOwnerCanPause" -vvvv
+
+# Test: No-owners no pueden pausar (SEGURO)
+forge test --match-test "test_SecureVault_NonOwnerCannotPause" -vvvv
+
+# Test: Funcionalidad de retiro de emergencia
+forge test --match-test "test_SecureVault_EmergencyWithdraw" -vvvv
+```
+
+#### Seguridad Avanzada (Control de Acceso Basado en Roles)
+```bash
+# Test: Control de acceso basado en roles
+forge test --match-test "test_AdvancedVault_RoleBasedAccess" -vvvv
+
+# Test: Aplicación de límite diario
+forge test --match-test "test_AdvancedVault_DailyLimitEnforcement" -vvvv
+
+# Test: Pausa de emergencia del guardian
+forge test --match-test "test_AdvancedVault_GuardianEmergencyPause" -vvvv
+
+# Test: Revocación de roles
+forge test --match-test "test_AdvancedVault_RoleRevocation" -vvvv
+
+# Test: Prevención de acceso no autorizado
+forge test --match-test "test_AdvancedVault_UnauthorizedAccess" -vvvv
+```
+
+#### Seguridad Multi-Firma
+```bash
+# Test: Creación de propuestas
+forge test --match-test "test_MultiSigVault_ProposalCreation" -vvvv
+
+# Test: Proceso de aprobación de propuestas
+forge test --match-test "test_MultiSigVault_ProposalApproval" -vvvv
+
+# Test: Ejecución de propuestas con timelock
+forge test --match-test "test_MultiSigVault_ProposalExecution" -vvvv
+
+# Test: Aplicación de timelock
+forge test --match-test "test_MultiSigVault_TimelockEnforcement" -vvvv
+
+# Test: Rechazo por aprobaciones insuficientes
+forge test --match-test "test_MultiSigVault_InsufficientApprovals" -vvvv
+
+# Test: Funcionalidad de bypass de emergencia
+forge test --match-test "test_MultiSigVault_EmergencyBypass" -vvvv
+```
+
+### 🔧 Tests de Casos Edge e Integración
+
+#### Casos Edge
+```bash
+# Test: Prevención de aprobación duplicada
+forge test --match-test "test_EdgeCase_DuplicateApproval" -vvvv
+
+# Test: Prevención de retiro excesivo
+forge test --match-test "test_EdgeCase_ExcessiveWithdrawal" -vvvv
+
+# Test: Manejo de expiración de propuestas
+forge test --match-test "test_EdgeCase_ProposalExpiry" -vvvv
+
+# Test: Retiro de cantidad cero
+forge test --match-test "test_EdgeCase_ZeroAmountWithdrawal" -vvvv
+```
+
+#### Tests de Integración
+```bash
+# Test: Integración de flujo completo
+forge test --match-test "test_Integration_FullWorkflow" -vvvv
+
+# Test: Flujo de trabajo multi-firma
+forge test --match-test "test_Integration_MultiSigWorkflow" -vvvv
+```
+
+### 📊 Análisis y Reportes
+
+#### Análisis de Gas
+```bash
+# Generar reporte de gas para todos los tests
+forge test --gas-report
+
+# Reporte de gas para test específico
+forge test --match-test "test_MultiSigVault_ProposalExecution" --gas-report
+
+# Reporte de gas para contrato específico
+forge test --match-contract AccessControlTest --gas-report
+```
+
+#### Cobertura de Código
+```bash
+# Generar reporte de cobertura
+forge coverage
+
+# Cobertura para contrato específico
+forge coverage --match-contract AccessControlTest
+
+# Cobertura con output detallado
+forge coverage --report lcov
+```
+
+### 🚀 Comandos de Deployment
+
+#### Deployment Local
+```bash
+# Iniciar blockchain local
+anvil
+
+# Deploy contratos localmente
+forge script content/access-control/scripts/Deploy.s.sol --rpc-url http://localhost:8545 --private-key 0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 --broadcast -vvvv
+```
+
+#### Deployment en Testnet
+```bash
+# Deploy en Sepolia testnet
+forge script content/access-control/scripts/Deploy.s.sol --rpc-url $SEPOLIA_RPC_URL --private-key $PRIVATE_KEY --broadcast --verify
+```
+
+### 🎬 Script de Demo para LinkedIn
+```bash
+#!/bin/bash
+
+echo "=== DEMOSTRACIÓN DE SEGURIDAD SOLIDITY ==="
+echo ""
+
+echo "1. MOSTRANDO VULNERABILIDADES:"
+echo "Cualquiera puede retirar fondos:"
+forge test --match-test "test_VulnerableVault_AnyoneCanWithdraw" -vvvv
+
+echo ""
+echo "2. SOLUCIÓN DE SEGURIDAD BÁSICA:"
+echo "Solo el owner puede retirar:"
+forge test --match-test "test_SecureVault_OnlyOwnerCanWithdraw" -vvvv
+
+echo ""
+echo "3. SOLUCIÓN DE SEGURIDAD AVANZADA:"
+echo "Control de acceso basado en roles:"
+forge test --match-test "test_AdvancedVault_RoleBasedAccess" -vvvv
+
+echo ""
+echo "4. SOLUCIÓN DE SEGURIDAD EMPRESARIAL:"
+echo "Gobernanza multi-firma:"
+forge test --match-test "test_MultiSigVault_ProposalExecution" -vvvv
+
+echo ""
+echo "5. FLUJO COMPLETO:"
+echo "Integración de extremo a extremo:"
+forge test --match-test "test_Integration_FullWorkflow" -vvvv
+```
+
+### 🎯 Comandos Más Importantes para Demo
+```bash
+# Mostrar vulnerabilidades
+forge test --match-test "test_VulnerableVault_AnyoneCanWithdraw" -vvvv
+
+# Mostrar seguridad básica
+forge test --match-test "test_SecureVault_OnlyOwnerCanWithdraw" -vvvv
+
+# Mostrar seguridad avanzada
+forge test --match-test "test_AdvancedVault_RoleBasedAccess" -vvvv
+
+# Mostrar multi-firma
+forge test --match-test "test_MultiSigVault_ProposalExecution" -vvvv
+
+# Mostrar flujo completo
+forge test --match-test "test_Integration_FullWorkflow" -vvvv
+```
+
+### 📝 Notas Importantes
+- Usa `-vvvv` para máxima verbosidad y ver todos los logs y transacciones
+- Usa `--gas-report` para analizar el consumo de gas
+- Usa `--match-test` para ejecutar tests específicos
+- Usa `--match-contract` para ejecutar todos los tests de un contrato específico
+- Usa `forge coverage` para verificar la cobertura de código
+- Usa el comando `time` para medir el tiempo de ejecución
 
 ## 📚 Recursos Adicionales
 
